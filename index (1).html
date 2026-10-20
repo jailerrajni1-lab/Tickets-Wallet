@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wallet</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#14213d">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Wallet">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#e8edf1;--ink:#14213d;--mute:#5b6b82;--card:#fff;--line:#c9d3de;--bus:#0f766e;--train:#3730a3;--acc:var(--bus)}
+body.train{--acc:var(--train)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,sans-serif;min-height:100vh;display:flex;justify-content:center;padding:28px 16px}
+main{width:100%;max-width:560px}
+h1{font-size:2rem;font-weight:800;margin:0 0 6px;letter-spacing:-.02em}
+p.sub{color:var(--mute);margin:0 0 26px;line-height:1.5;display:block}
+.grp{margin:26px 0 10px;font-size:.8rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.sub+.grp{margin-top:0}
+.screen{display:none}.screen.on{display:block}
+.pick{display:grid;gap:14px}
+.stub{all:unset;cursor:pointer;display:flex;align-items:center;gap:16px;background:var(--card);border-radius:14px;padding:22px 20px;border-left:10px solid var(--c);position:relative}
+.stub:focus-visible,.btn:focus-visible,.drop:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.stub::after{content:"";position:absolute;right:74px;top:10px;bottom:10px;border-right:2px dashed var(--line)}
+.stub b{font-size:1.5rem;display:block}.stub small{color:var(--mute)}
+.stub svg{width:44px;height:44px;margin-left:auto;stroke:var(--c);fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.stub:hover{box-shadow:0 0 0 2px var(--c)}
+.back{all:unset;cursor:pointer;color:var(--mute);margin-bottom:14px;display:inline-block}
+.back:hover{color:var(--ink)}
+.drop{display:block;width:100%;border:2px dashed var(--acc);border-radius:14px;background:var(--card);padding:38px 18px;text-align:center;cursor:pointer}
+.drop.over{background:#f3f7fb}
+.drop b{display:block;font-size:1.2rem;margin-bottom:4px}.drop span{color:var(--mute);font-size:.92rem}
+.drop input{display:none}
+.status{margin:18px 0;color:var(--mute)}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:8px}.bar i{display:block;height:100%;width:0;background:var(--acc);transition:width .2s}
+.err{color:#b42318;margin:14px 0;line-height:1.45}
+.ticket{background:var(--card);border-radius:14px;overflow:hidden;margin-top:18px}
+.head{background:var(--acc);color:#fff;padding:16px 20px}
+.head small{opacity:.85}.head .big{font-size:2.1rem;font-weight:800;letter-spacing:.02em;word-break:break-all}
+.row{display:flex;gap:12px;padding:14px 20px;border-top:1px dashed var(--line);align-items:center}
+.row label{flex:0 0 118px;color:var(--mute);font-size:.9rem}
+.row input{flex:1;min-width:0;font:inherit;font-weight:600;border:0;border-bottom:1px solid transparent;background:transparent;color:var(--ink);padding:4px 0}
+.row input:hover,.row input:focus{border-bottom-color:var(--acc);outline:0}
+.pax{padding:6px 20px 14px;border-top:1px dashed var(--line)}
+.pax h3{font-size:.9rem;font-weight:400;color:var(--mute);margin:10px 0 6px}
+.p{display:flex;gap:10px;margin:6px 0}
+.p input{font:inherit;font-weight:600;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
+.p .n{flex:1}.p .s{flex:0 0 120px;text-align:center;background:var(--acc);color:#fff;border-color:var(--acc)}
+/* train passenger: name, coach, seat, seat type */
+.p.tr{display:grid;grid-template-columns:minmax(0,1fr) 64px 78px 104px;gap:8px 10px;align-items:end;margin:12px 0}
+.p.tr .f{display:flex;flex-direction:column;gap:3px;min-width:0}
+.p.tr .f small{color:var(--mute);font-size:.72rem;letter-spacing:.03em;text-transform:uppercase}
+.p.tr input{width:100%}
+.p.tr .c{text-align:center;border-color:var(--acc);color:var(--acc)}
+.p.tr .s{flex:none;text-align:center}
+.p.tr .t{text-align:center}
+[hidden]{display:none!important}
+body.idp{--acc:var(--ink)}
+.idform{display:flex;align-items:center;gap:12px;margin:0 0 12px}
+.idform label{color:var(--mute);font-size:.9rem}
+.idform select{flex:1;font:inherit;font-weight:600;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:9px 10px}
+.idc{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:14px;padding:10px;margin:10px 0}
+.idc img{width:76px;height:54px;object-fit:cover;border-radius:6px;background:#eef2f6}
+.idc .m{flex:1;min-width:0}.idc .m b{display:block}.idc .m small{color:var(--mute)}
+.btn.sm{padding:8px 13px;font-size:.9rem}
+.btn.ghost{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
+.btn.light{background:#fff;color:var(--ink)}
+.viewer{position:fixed;inset:0;background:rgba(10,16,30,.95);display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:16px;z-index:10}
+.viewer.on{display:flex}
+.viewer img{max-width:100%;max-height:78vh;object-fit:contain;background:#fff;border-radius:6px}
+.vbar{display:flex;align-items:center;gap:10px;color:#fff;flex-wrap:wrap;justify-content:center}
+@media(max-width:480px){.idc{flex-wrap:wrap}.idc .m{flex:1 0 50%}}
+.savebox{background:var(--card);border-radius:14px;padding:14px 20px;margin-top:12px;display:flex;flex-direction:column;gap:10px}
+.savebox .sl{color:var(--mute);font-size:.9rem}
+.seg{display:flex;gap:8px}
+.seg button{all:unset;cursor:pointer;flex:1;text-align:center;padding:10px;border-radius:10px;font-weight:600;box-shadow:inset 0 0 0 1.5px var(--line);color:var(--ink)}
+.seg button.on{background:var(--acc);color:#fff;box-shadow:none}
+.seg button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.savebox .btn{text-align:center}
+.savebox .msg{font-size:.9rem;color:var(--mute);line-height:1.5}
+.tkh{font-size:1.05rem;margin:22px 0 4px;display:flex;justify-content:space-between;align-items:baseline}
+.tkh small{color:var(--mute);font-weight:400}
+.tk{background:var(--card);border-radius:14px;padding:14px 16px;margin:10px 0;border-left:8px solid var(--c)}
+.tk.bus{--c:var(--bus)}.tk.train{--c:var(--train)}
+.tk .t1{font-weight:800;font-size:1.05rem}
+.tk .t2,.tk .t3{color:var(--mute);font-size:.92rem;margin-top:2px;word-break:break-word}
+.tk .acts{display:flex;gap:8px;margin-top:10px}
+.note{color:var(--mute);font-size:.85rem;line-height:1.45;margin:14px 2px}
+.btn{all:unset;cursor:pointer;background:var(--ink);color:#fff;padding:11px 18px;border-radius:10px;font-weight:600}
+details{margin-top:12px;color:var(--mute);font-size:.85rem}pre{white-space:pre-wrap;background:#fff;padding:10px;border-radius:8px;max-height:220px;overflow:auto}
+@media(max-width:480px){.p.tr{grid-template-columns:.8fr .9fr 1.5fr}.p.tr .f.nm{grid-column:1/-1}}
+@media(max-width:420px){.row{flex-direction:column;align-items:flex-start;gap:2px}.row label{flex:none}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<section id="s1" class="screen on">
+  <h1>Wallet</h1>
+  <p class="sub">Your tickets and ID, ready for the check.</p>
+  <h2 class="grp">Saved</h2>
+  <div class="pick">
+    <button class="stub" id="tkstub" style="--c:#b45309"><span><b>My tickets</b><small id="tkcount">Not saved yet</small></span>
+      <svg viewBox="0 0 48 48"><path d="M6 14h36v7a3 3 0 0 0 0 6v7H6v-7a3 3 0 0 0 0-6z"/><path d="M30 14v20" stroke-dasharray="2 3"/></svg></button>
+    <button class="stub" id="idstub" style="--c:var(--ink)"><span><b>ID proof</b><small id="idcount">Not saved yet</small></span>
+      <svg viewBox="0 0 48 48"><rect x="6" y="11" width="36" height="26" rx="4"/><circle cx="18" cy="22" r="4"/><path d="M11 32c1-4 4-6 7-6s6 2 7 6M29 20h8M29 26h8"/></svg></button>
+  </div>
+  <h2 class="grp">Add a ticket</h2>
+  <div class="pick">
+    <button class="stub" style="--c:var(--bus)" data-t="bus"><span><b>Bus</b><small>Read a KSRTC ticket</small></span>
+      <svg viewBox="0 0 48 48"><rect x="8" y="7" width="32" height="30" rx="5"/><path d="M8 24h32M14 37v4M34 37v4"/><circle cx="16" cy="31" r="1.5"/><circle cx="32" cy="31" r="1.5"/></svg></button>
+    <button class="stub" style="--c:var(--train)" data-t="train"><span><b>Train</b><small>Read an IRCTC ticket</small></span>
+      <svg viewBox="0 0 48 48"><rect x="10" y="6" width="28" height="30" rx="6"/><path d="M10 22h28M17 42l5-6M31 42l-5-6"/><circle cx="17" cy="29" r="1.5"/><circle cx="31" cy="29" r="1.5"/></svg></button>
+  </div>
+  <div id="inst" hidden style="margin-top:22px"></div>
+</section>
+
+<section id="s2" class="screen">
+  <button class="back" id="back">&larr; Change ticket type</button>
+  <h1 id="t2"></h1>
+  <p class="sub" id="s2sub"></p>
+  <label class="drop" id="drop" tabindex="0">
+    <b>Upload ticket</b><span>Screenshot, photo or PDF. Drag it here or tap to choose.</span>
+    <input type="file" id="file" accept="image/*,application/pdf">
+  </label>
+  <div class="status" id="status" hidden><span id="stxt"></span><div class="bar"><i id="bar"></i></div></div>
+  <div class="err" id="err" hidden></div>
+  <div id="out"></div>
+</section>
+
+<section id="s3" class="screen">
+  <button class="back" id="idback">&larr; Back</button>
+  <h1>Identity proof</h1>
+  <p class="sub">Keep a copy of your ID ready for the ticket check. It is saved only in this browser on this device and is never uploaded.</p>
+  <div class="idform"><label for="idtype">ID type</label>
+    <select id="idtype"><option>Aadhaar</option><option>Driving licence</option><option>Voter ID</option><option>Passport</option><option>PAN card</option><option>Other</option></select></div>
+  <label class="drop" id="iddrop" tabindex="0">
+    <b>Add ID proof</b><span>Photo, screenshot or PDF (first page is saved). Drag it here or tap to choose.</span>
+    <input type="file" id="idfile" accept="image/*,application/pdf">
+  </label>
+  <div class="status" id="idst" hidden>Saving…</div>
+  <div class="err" id="iderr" hidden></div>
+  <p class="note" id="idempty">Nothing saved yet.</p>
+  <div id="idlist"></div>
+  <p class="note">Anyone who can open this browser on this device can see saved IDs, and clearing browser data removes them. Delete a copy when you no longer need it here. A saved copy is a backup: a TTE may still ask for the original or a DigiLocker copy.</p>
+</section>
+<section id="s4" class="screen">
+  <div id="tklist">
+    <button class="back" id="tkback">&larr; Back</button>
+    <h1>My tickets</h1>
+    <p class="sub">Saved on this device only. Onward and return journeys are kept apart so the right one is a tap away.</p>
+    <div id="tkitems"></div>
+  </div>
+  <div id="tkview"></div>
+</section>
+</main>
+
+<div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="Identity proof">
+  <img id="vimg" alt="">
+  <div class="vbar"><button class="btn light" id="vprev">Previous</button><span id="vlabel"></span><button class="btn light" id="vnext">Next</button><button class="btn light" id="vclose">Close</button></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.1.1/tesseract.min.js"></script>
+<script>
+const $=id=>document.getElementById(id);
+let type="bus";
+
+document.querySelectorAll(".stub[data-t]").forEach(b=>b.onclick=()=>{
+  type=b.dataset.t; document.body.className=type;
+  $("t2").textContent=type==="bus"?"Upload your bus ticket":"Upload your train ticket";
+  $("s2sub").textContent=type==="bus"?"KSRTC ticket. I will pick out PNR, seat number, route and date.":"IRCTC ticket. I will pick out PNR, train, route, departure and arrival, and each passenger's coach, seat number and seat type.";
+  reset(); $("s1").classList.remove("on"); $("s2").classList.add("on");
+});
+$("back").onclick=()=>{$("s2").classList.remove("on");$("s1").classList.add("on");document.body.className=""};
+
+const drop=$("drop"),fi=$("file");
+drop.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();fi.click()}};
+["dragover","dragenter"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over")}));
+["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("over")}));
+drop.addEventListener("drop",e=>{if(e.dataTransfer.files[0])run(e.dataTransfer.files[0])});
+fi.onchange=()=>{if(fi.files[0])run(fi.files[0]);fi.value=""};
+
+function reset(){$("out").innerHTML="";$("err").hidden=true;$("status").hidden=true}
+function prog(t,p){$("status").hidden=false;$("stxt").textContent=t;if(p!=null)$("bar").style.width=Math.round(p*100)+"%"}
+function fail(m){$("status").hidden=true;$("err").hidden=false;$("err").textContent=m}
+
+async function run(file){
+  reset();
+  try{
+    let text="";
+    if(file.type==="application/pdf"||/\.pdf$/i.test(file.name)) text=await readPdf(file);
+    else if(file.type.startsWith("image/")) text=await ocr(file,"Reading ticket");
+    else return fail("Please upload an image (PNG, JPG) or a PDF.");
+    $("status").hidden=true;
+    if(text.trim().length<20) return fail("Could not read any text. Try a sharper, straight-on screenshot or the original PDF.");
+    show(type==="bus"?parseBus(text):parseTrain(text),text);
+  }catch(e){fail("Something went wrong while reading the ticket ("+(e.message||e)+"). Check your internet connection and try again.")}
+}
+
+async function ocr(src,label){
+  const r=await Tesseract.recognize(src,type==="bus"?"eng+kan":"eng",{logger:m=>{if(m.status==="recognizing text")prog(label+"…",m.progress);else prog("Loading reader…")}});
+  return r.data.text;
+}
+
+let workerReady=false;
+async function loadPdf(file){
+  if(!workerReady){
+    const wsrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    const blob=await (await fetch(wsrc)).blob();
+    pdfjsLib.GlobalWorkerOptions.workerSrc=URL.createObjectURL(blob);
+    workerReady=true;
+  }
+  return pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;
+}
+
+async function readPdf(file){
+  prog("Opening PDF…",0);
+  const pdf=await loadPdf(file);
+  let all="";
+  for(let i=1;i<=Math.min(pdf.numPages,3);i++){
+    const pg=await pdf.getPage(i),tc=await pg.getTextContent();
+    const its=tc.items.filter(it=>it.str.trim()).map(it=>({x:it.transform[4],y:it.transform[5],s:it.str})).sort((a,b)=>b.y-a.y);
+    const rows=[];
+    its.forEach(it=>{const r=rows[rows.length-1];if(r&&Math.abs(r.y-it.y)<=4)r.it.push(it);else rows.push({y:it.y,it:[it]})});
+    let t=rows.map(r=>r.it.sort((a,b)=>a.x-b.x).map(o=>o.s).join(" ")).join("\n");
+    if(t.trim().length<40){
+      const vp=pg.getViewport({scale:2.2}),c=document.createElement("canvas");
+      c.width=vp.width;c.height=vp.height;
+      await pg.render({canvasContext:c.getContext("2d"),viewport:vp}).promise;
+      t=await ocr(c,"Reading page "+i);
+    }
+    all+=t+"\n";
+  }
+  return all;
+}
+
+/* ---------- parsing ---------- */
+const clean=s=>(s||"").replace(/\s+/g," ").replace(/^[\s:.\-|]+|[\s|]+$/g,"");
+const pick=(t,res)=>{for(const r of res){const m=t.match(r);if(m&&m[1]&&clean(m[1]))return clean(m[1])}return ""};
+const DATE=String.raw`(\d{1,2}[\s\-\/.]+(?:[A-Za-z]{3,9}|\d{1,2})[\s\-\/.,]+\d{2,4})`;
+
+function findDate(t){
+  return pick(t,[new RegExp(String.raw`(?:Date\s*of\s*Journey|Journey\s*Date|DOJ|Travel\s*Date|Departure\s*Date)\s*[:\-]?\s*`+DATE,"i"),
+    new RegExp(String.raw`(?:Date|Departure)[^\n\d]{0,15}`+DATE,"i"),new RegExp(DATE)]);
+}
+function findRoute(t){
+  const stn=String.raw`([A-Za-z][A-Za-z .()&'\-]{1,45}?)`;
+  const end=String.raw`(?=\s{2,}|\n|\s(?:To|Date|Boarding|Class|Quota|Distance|Departure|Arrival|Train|PNR|Fare)\b|$)`;
+  let from=pick(t,[new RegExp(String.raw`(?:^|\n|\s)From\s*[:\-]?\s*`+stn+end,"i"),new RegExp(String.raw`Boarding\s*(?:At|Point|Station)?\s*[:\-]?\s*`+stn+end,"i")]);
+  let to=pick(t,[new RegExp(String.raw`(?:^|\n|\s)To\s*[:\-]?\s*`+stn+end,"i"),new RegExp(String.raw`Reserved\s*Upto\s*[:\-]?\s*`+stn+end,"i")]);
+  if(!from||!to){const m=t.match(/([A-Z][A-Za-z .()]{2,35})\s+(?:to|→|->|-)\s+([A-Z][A-Za-z .()]{2,35})/);if(m){from=from||clean(m[1]);to=to||clean(m[2])}}
+  return{from,to};
+}
+
+const BUS_LABELS=["PNR No","Trip Code","Start Place","Departure Time","End Place","Total Seats","OB Reference No","Customer GSTIN","Date of Journey","Class of Service","Boarding Point","Platform No","Alighting Point","Seat No(s)","Seat No","Txn. Password","Txn Password","Passenger Information","Fare Details","Booked By","Booked On"];
+function labelMap(t){
+  const esc=x=>x.replace(/[.()]/g,"\\$&").replace(/\s+/g,"\\s*");
+  const re=new RegExp("("+BUS_LABELS.map(esc).join("|")+")","gi"),hits=[...t.matchAll(re)],map={};
+  hits.forEach((h,i)=>{
+    const key=h[1].toLowerCase().replace(/[^a-z]/g,"");
+    let v=t.slice(h.index+h[0].length,i+1<hits.length?hits[i+1].index:t.length);
+    v=v.replace(/\s*\n\s*/g," ").replace(/^[\s:.\-]+/,"").split(/[\u0C80-\u0CFF]/)[0].replace(/[\s\/|:]+$/,"");
+    if(!(key in map)||!map[key])map[key]=clean(v);
+  });
+  return map;
+}
+/* Keep only the clean English part of a value: drop garbled/Kannada text that follows it */
+const asciiHead=v=>(v||"").split(/[^\x00-\x7F]/)[0];
+const alphaHead=v=>{const m=asciiHead(v).match(/^\s*([A-Za-z][A-Za-z .()&'\-]*)/);return m?clean(m[1]):""};
+
+function findPnr(t,m){
+  const norm=x=>x.replace(/\s+/g,"").toUpperCase().replace(/^K5(?=\d)/,"KS");
+  /* 1. value that follows the "PNR No" label (letters + digits, tolerating a space like "KS 23826619") */
+  let v=asciiHead(m.pnrno);
+  let r=v.match(/\b([A-Za-z]{1,3})\s?(\d{6,12})\b/)||v.match(/\b(\d{8,12})\b/);
+  if(r)return norm(r[0]);
+  /* 2. "PNR" followed closely by the number, even if the label map missed it */
+  const flat=t.replace(/[^\x00-\x7F]+/g," ").replace(/\s+/g," ");
+  r=flat.match(/PNR\s*(?:No\.?|Number)?\s*[:.\-]?\s*([A-Za-z]{1,3}\s?\d{6,12})\b/i)||flat.match(/PNR[^A-Za-z0-9]{0,15}([A-Za-z0-9]{6,14})\b/i);
+  if(r&&/\d/.test(r[1]))return norm(r[1]);
+  /* 3. KSRTC PNRs start with KS followed by digits */
+  r=flat.match(/\bK[S5]\s?\d{7,10}\b/i);
+  return r?norm(r[0]):"";
+}
+function findTime(t,m){
+  const T=/\b([01]?\d|2[0-3])\s*[:.]\s*([0-5]\d)\b/;
+  let r=asciiHead(m.departuretime).match(T);
+  if(!r){const flat=t.replace(/[^\x00-\x7F]+/g," ").replace(/\s+/g," ");
+    r=flat.match(/Departure\s*Time\s*[:\-]?\s*(?:[^0-9A-Za-z]{0,6})([01]?\d|2[0-3])\s*[:.]\s*([0-5]\d)\b/i)}
+  if(!r)return "";
+  const n=r.length>3?[r[1],r[2]]:[r[1],r[2]];
+  return n[0].padStart(2,"0")+":"+n[1];
+}
+function parseBus(t){
+  const m=labelMap(t);
+  const pnr=findPnr(t,m);
+  const time=findTime(t,m);
+  const seatSrc=asciiHead(m.seatnos||m.seatno)||((m.totalseats||"").match(/\(([^)]*)\)/)||[0,""])[1];
+  const seatList=(seatSrc.match(/^\s*((?:[A-Z]{0,2}\d{1,3}[A-Z]?)(?:\s*,\s*[A-Z]{0,2}\d{1,3}[A-Z]?)*)/i)||[0,""])[1];
+  const seats=seatList.match(/[A-Z]{0,2}\d{1,3}[A-Z]?/gi)||[];
+  let names=[];
+  const a=t.search(/Passenger\s*Information/i),b=t.search(/Fare\s*Details/i);
+  if(a>=0)(b>a?t.slice(a,b):t.slice(a)).split("\n").forEach(l=>{
+    if(!/\b(Male|Female|Transgender)\b/i.test(l))return;
+    const n=clean(l.split(/\s+\d|\s+(?:Adult|Child)\b|\s+(?:Male|Female|Transgender)\b/i)[0].replace(/[\u0C80-\u0CFF]/g,""));
+    if(n&&!/^(name|gender)$/i.test(n))names.push(n);
+  });
+  const pax=[],n=Math.max(names.length,seats.length,1);
+  for(let i=0;i<n;i++)pax.push({name:names[i]||"",seat:seats[i]||""});
+  let date=((m.dateofjourney||"").match(new RegExp(DATE))||[""])[0];
+  if(!date)date=findDate(t.split(/Booked\s*On/i)[0]);
+  const rt=findRoute(t);
+  return{head:["PNR",pnr],rows:[["Departure time",time],["From",alphaHead(m.startplace)||rt.from],["To",alphaHead(m.endplace)||rt.to],["Date of journey",date]],pax};
+}
+
+/* ---------- train (IRCTC ERS) ---------- */
+const STAT="CNF|RAC|WL|GNWL|RLWL|PQWL|RSWL|RLGN|TQWL|CAN";
+const titleCase=s=>clean(s).toLowerCase().replace(/\b[a-z]/g,c=>c.toUpperCase());
+
+/* "Departure* 21:15 19-Oct-2026" -> "21:15 · 19 Oct 2026" */
+function trainWhen(t,kw){
+  const m=t.match(new RegExp(kw+String.raw`\*?\s*[:\-]?\s*(\d{1,2})\s*[:.]\s*(\d{2})\s+(\d{1,2}[\s\-\/.]+[A-Za-z0-9]{2,9}[\s\-\/.,]+\d{2,4})`,"i"));
+  if(!m)return "";
+  let d=clean(m[3]);
+  if(/[A-Za-z]/.test(d))d=d.replace(/[\-\/.,]+/g," ").replace(/\s+/g," ");
+  return m[1].padStart(2,"0")+":"+m[2]+" · "+d;
+}
+
+/* Station names look like "MGR CHENNAI CTL (MAS)". Order on the slip: Booked from, Boarding At, To. */
+function trainRoute(t){
+  const head=t.split(/\bPNR\b/)[0];
+  const st=[...head.matchAll(/([A-Z][A-Z0-9.&' \-]{1,40}?)\s*\(([A-Z]{2,5})\)/g)]
+    .filter(m=>m[2]!=="ERS").map(m=>clean(m[1])+" ("+m[2]+")");
+  if(st.length>=3)return{from:st[1],to:st[2]};
+  if(st.length===2)return{from:st[0],to:st[1]};
+  return findRoute(t);
+}
+
+/* Reads the Current Status (last status on the line), e.g. CNF/S2/62/UPPER -> coach S2, seat 62, type Upper */
+function trainStatus(rest){
+  const segs=rest.split(new RegExp("(?=\\b(?:"+STAT+")\\b)","i")).map(clean).filter(x=>new RegExp("^(?:"+STAT+")\\b","i").test(x));
+  if(!segs.length)return null;
+  const m=segs[segs.length-1].match(new RegExp("^("+STAT+")\\b\\s*\\/?\\s*(.*)$","i"));
+  const stat=m[1].toUpperCase(),parts=m[2].split("/").map(clean).filter(Boolean);
+  let coach="",num="",typ="";
+  if(parts.length>=2&&/^[A-Z]{1,2}\d{0,2}$/i.test(parts[0])&&!/^(?:WL|RAC|CNF)$/i.test(parts[0])&&/^\d+/.test(parts[1])){
+    coach=parts[0].toUpperCase();num=parts[1];typ=parts.slice(2).join(" ");
+  }else if(parts.length&&/^\d+$/.test(parts[0])&&stat==="CNF"){
+    num=parts[0];typ=parts.slice(1).join(" ");
+  }else num=parts.join(" / ");
+  return{coach,seat:(stat==="CNF"?num:(stat+" "+num).trim()),type:titleCase(typ)};
+}
+
+function parseTrain(t){
+  const pnr=pick(t,[/\bPNR\b[^\d]{0,80}?(\d{10})\b/i])||((t.match(/\b\d{10}\b/)||[""])[0]);
+  const tn=pick(t,[/Train\s*(?:No\.?|Number)?[^\n\d]{0,25}(\d{5})/i,/\b(\d{5})\s*[\/\-]\s*[A-Z]/]);
+  const nm=t.match(/\b\d{5}\s*[\/\-]\s*([A-Z][A-Z0-9 .&'\-]{2,40})/);
+  const tname=nm?clean(nm[1].replace(/\s+(?:SLEEPER CLASS|AC 3 TIER|AC 2 TIER|AC FIRST CLASS|AC CHAIR CAR|AC 3 ECONOMY|SECOND SEATING|FIRST CLASS|EXECUTIVE CHAIR CAR|EXECUTIVE ANUBHUTI|VISTADOME[A-Z ]*|THIRD AC|SECOND AC|FIRST AC)\b.*$/,"")):"";
+
+  /* passengers: only look inside the Passenger Details block */
+  const a=t.search(/Passenger\s*Details/i);
+  let sec=a>=0?t.slice(a):t;
+  const e=sec.search(/Payment\s*Details|Transaction|Beware|IRCTC\s*Convenience/i);
+  if(e>0)sec=sec.slice(0,e);
+  const pax=[];
+  const lineRe=/^\s*(?:(\d{1,2})[.)]?\s+)?(?:([A-Za-z][A-Za-z .'\-]*?)\s+)?(\d{1,3})\s+(Male|Female|Transgender|M|F|T)\b(.*)$/i;
+  sec.split("\n").forEach(line=>{
+    const m=line.match(lineRe);
+    if(!m)return;
+    const s=trainStatus(m[5]);
+    if(!s)return;
+    pax.push({name:clean(m[2]||""),coach:s.coach,seat:s.seat,type:s.type});
+  });
+  if(!pax.length)sec.split("\n").forEach(line=>{
+    const s=trainStatus(line);
+    if(s)pax.push({name:"",coach:s.coach,seat:s.seat,type:s.type});
+  });
+  if(!pax.length)pax.push({name:"",coach:"",seat:"",type:""});
+
+  const r=trainRoute(t);
+  return{head:["PNR",pnr],
+    rows:[["Train",tn+(tname?" · "+tname:"")],["From",r.from],["To",r.to],["Departure",trainWhen(t,"Departure")],["Arrival",trainWhen(t,"Arrival")]],
+    pax,train:true};
+}
+
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function paxRow(p,train,ro){
+  const r=ro?" readonly":"";
+  if(!train)return `<div class="p"><input class="n" value="${esc(p.name)}"${r} placeholder="Name not found"><input class="s" value="${esc(p.seat)}"${r} placeholder="Seat?"></div>`;
+  return `<div class="p tr">
+    <div class="f nm"><small>Name</small><input class="n" value="${esc(p.name)}"${r} placeholder="Name not found"></div>
+    <div class="f"><small>Coach</small><input class="c" value="${esc(p.coach)}"${r} placeholder="?"></div>
+    <div class="f"><small>Seat</small><input class="s" value="${esc(p.seat)}"${r} placeholder="?"></div>
+    <div class="f"><small>Seat type</small><input class="t" value="${esc(p.type)}"${r} placeholder="?"></div>
+  </div>`;
+}
+function cardHTML(d,ro){
+  const r=ro?" readonly":"";
+  return `<div class="ticket">
+    <div class="head"><small>${d.head[0]}</small><div class="big"><input${ro?"":' id="h"'} value="${esc(d.head[1])}"${r} style="all:unset;width:100%;font:inherit"></div></div>
+    ${d.rows.map(x=>`<div class="row"><label>${x[0]}</label><input value="${esc(x[1])}"${r} placeholder="Not found"></div>`).join("")}
+    <div class="pax"><h3>${d.train?"Passengers":"Passenger and seat"}</h3>
+      ${d.pax.map(p=>paxRow(p,d.train,ro)).join("")}
+    </div></div>`;
+}
+function show(d,raw){
+  const miss=[d.head[1],...d.rows.map(r=>r[1]),...d.pax.map(p=>p.seat),...(d.train?d.pax.map(p=>p.coach):[])].some(v=>!v);
+  const sv=tkAll(),hasO=sv.some(t=>t.dir==="Onward"),hasR=sv.some(t=>t.dir==="Return");
+  const def=hasO&&!hasR?"Return":"Onward";
+  const seg=x=>`<button role="radio" aria-checked="${x===def}" class="${x===def?"on":""}" data-dir="${x}">${x}</button>`;
+  $("out").innerHTML=cardHTML(d,false)+`
+    <div class="savebox"><div class="sl" id="dirl">Save this ticket as</div>
+      <div class="seg" role="radiogroup" aria-labelledby="dirl">${seg("Onward")}${seg("Return")}</div>
+      <button class="btn" id="tksave">Save ticket</button>
+      <div class="msg" id="tkmsg" role="status"></div>
+    </div>
+    <p class="note">${miss?"Some details were not found. Fill them in from your ticket.":"Check these against your ticket."} Every field can be edited, and the saved copy uses what you see here. The ticket is read in your browser and is not uploaded anywhere.</p>
+    <details><summary>Text read from the ticket</summary><pre>${esc(raw)}</pre></details>
+    <p style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" onclick="document.getElementById('file').click()">Upload another ticket</button>
+    <button class="btn ghost" onclick="${ids.length?"openViewer(0)":"goIds()"}">${ids.length?"Show ID proof":"Save ID proof"}</button></p>`;
+  document.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>document.querySelectorAll(".seg button").forEach(x=>{x.classList.toggle("on",x===b);x.setAttribute("aria-checked",x===b)}));
+  $("tksave").onclick=saveTicket;
+}
+
+/* ---------- identity proof (kept only in this browser, via IndexedDB) ---------- */
+let ids=[],urls=[],mem=[],idPersist=true,vi=0,delTimer=null;
+function idb(){
+  return new Promise((res,rej)=>{
+    try{
+      if(!window.indexedDB)return rej(new Error("no indexedDB"));
+      const r=indexedDB.open("ticket-analyser",1);
+      r.onupgradeneeded=()=>r.result.createObjectStore("ids",{keyPath:"id"});
+      r.onsuccess=()=>res(r.result);
+      r.onerror=()=>rej(r.error);
+    }catch(e){rej(e)}
+  });
+}
+const idReq=(db,mode,fn)=>new Promise((res,rej)=>{
+  const tx=db.transaction("ids",mode),q=fn(tx.objectStore("ids"));
+  tx.oncomplete=()=>res(q&&q.result);tx.onerror=tx.onabort=()=>rej(tx.error);
+});
+async function idAll(){
+  try{const db=await idb();const all=await idReq(db,"readonly",s=>s.getAll());return all.sort((a,b)=>a.added-b.added)}
+  catch(e){idPersist=false;return mem.slice()}
+}
+async function idPut(rec){
+  try{const db=await idb();await idReq(db,"readwrite",s=>s.put(rec))}
+  catch(e){idPersist=false;mem.push(rec)}
+}
+async function idDel(id){
+  mem=mem.filter(r=>r.id!==id);
+  try{const db=await idb();await idReq(db,"readwrite",s=>s.delete(id))}catch(e){}
+}
+
+const blobOf=c=>new Promise((res,rej)=>c.toBlob(b=>b?res(b):rej(new Error("Could not process that file.")),"image/jpeg",.88));
+async function toJpeg(file){
+  const c=document.createElement("canvas"),x=c.getContext("2d");
+  if(file.type==="application/pdf"||/\.pdf$/i.test(file.name)){
+    const pdf=await loadPdf(file),pg=await pdf.getPage(1),vp=pg.getViewport({scale:2});
+    c.width=vp.width;c.height=vp.height;x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);
+    await pg.render({canvasContext:x,viewport:vp}).promise;
+    return blobOf(c);
+  }
+  if(!file.type.startsWith("image/"))throw new Error("Please choose an image (PNG, JPG) or a PDF.");
+  const bmp=await createImageBitmap(file,{imageOrientation:"from-image"}).catch(()=>createImageBitmap(file));
+  const k=Math.min(1,1800/Math.max(bmp.width,bmp.height));
+  c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);
+  x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(bmp,0,0,c.width,c.height);
+  return blobOf(c);
+}
+
+function renderIds(){
+  urls.forEach(u=>URL.revokeObjectURL(u));urls=[];
+  $("idlist").innerHTML=ids.map((r,i)=>{
+    const u=URL.createObjectURL(r.blob);urls.push(u);
+    const d=new Date(r.added).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"});
+    return `<div class="idc"><img src="${u}" alt="${esc(r.type)} preview"><div class="m"><b>${esc(r.type)}</b><small>Saved ${d}</small></div>
+      <button class="btn sm" data-v="${i}">View</button><button class="btn sm ghost" data-d="${i}">Delete</button></div>`;
+  }).join("");
+  $("idempty").hidden=ids.length>0;
+  $("idcount").textContent=ids.length?ids.length+" saved":"Not saved yet";
+}
+async function refreshIds(){ids=await idAll();renderIds()}
+
+async function addId(file){
+  const err=$("iderr");err.hidden=true;$("idst").hidden=false;
+  try{
+    const blob=await toJpeg(file);
+    await idPut({id:Date.now()+"-"+Math.random().toString(36).slice(2,7),type:$("idtype").value,added:Date.now(),blob});
+    keepStorage();await refreshIds();
+    if(!idPersist){err.hidden=false;err.textContent="This browser would not let me store it, so it is kept only until you close this page."}
+  }catch(e){
+    err.hidden=false;
+    err.textContent=e&&e.name==="PasswordException"?"This PDF is password protected. Upload a screenshot or photo of the ID instead.":"Could not save that file ("+((e&&e.message)||e)+").";
+  }finally{$("idst").hidden=true}
+}
+
+function goIds(){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on"));
+  $("s3").classList.add("on");document.body.className="idp";
+}
+$("idstub").onclick=goIds;
+$("idback").onclick=()=>{$("s3").classList.remove("on");$("s1").classList.add("on");document.body.className=""};
+
+const idd=$("iddrop"),idf=$("idfile");
+idd.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();idf.click()}};
+["dragover","dragenter"].forEach(ev=>idd.addEventListener(ev,e=>{e.preventDefault();idd.classList.add("over")}));
+["dragleave","drop"].forEach(ev=>idd.addEventListener(ev,e=>{e.preventDefault();idd.classList.remove("over")}));
+idd.addEventListener("drop",e=>{if(e.dataTransfer.files[0])addId(e.dataTransfer.files[0])});
+idf.onchange=()=>{if(idf.files[0])addId(idf.files[0]);idf.value=""};
+
+$("idlist").onclick=async e=>{
+  const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.v!=null)return openViewer(+b.dataset.v);
+  if(b.dataset.d!=null){
+    if(b.dataset.armed){clearTimeout(delTimer);await idDel(ids[+b.dataset.d].id);return refreshIds()}
+    b.dataset.armed="1";b.textContent="Tap again to delete";
+    delTimer=setTimeout(()=>{b.textContent="Delete";delete b.dataset.armed},3000);
+  }
+};
+
+function drawViewer(){
+  const r=ids[vi];$("vimg").src=urls[vi];$("vimg").alt=r.type+" identity proof";
+  $("vlabel").textContent=r.type+(ids.length>1?" ("+(vi+1)+" of "+ids.length+")":"");
+  $("vprev").hidden=$("vnext").hidden=ids.length<2;
+}
+function openViewer(i){
+  if(!ids.length)return;
+  vi=i;drawViewer();$("viewer").classList.add("on");$("vclose").focus();
+}
+const closeViewer=()=>$("viewer").classList.remove("on");
+$("vclose").onclick=closeViewer;
+$("vprev").onclick=()=>{vi=(vi-1+ids.length)%ids.length;drawViewer()};
+$("vnext").onclick=()=>{vi=(vi+1)%ids.length;drawViewer()};
+$("viewer").onclick=e=>{if(e.target.id==="viewer")closeViewer()};
+document.addEventListener("keydown",e=>{
+  if(!$("viewer").classList.contains("on"))return;
+  if(e.key==="Escape")closeViewer();
+  if(e.key==="ArrowLeft"&&ids.length>1)$("vprev").click();
+  if(e.key==="ArrowRight"&&ids.length>1)$("vnext").click();
+});
+/* ---------- saved tickets: Onward / Return (kept only in this browser) ---------- */
+let tkMem=[],tkPersist=true,tkTimer=null;
+function tkAll(){
+  if(!tkPersist)return tkMem.slice();
+  try{const v=localStorage.getItem("ta-tickets");return v?JSON.parse(v):[]}catch(e){tkPersist=false;return tkMem.slice()}
+}
+function tkStore(a){
+  tkMem=a.slice();
+  try{localStorage.setItem("ta-tickets",JSON.stringify(a));tkPersist=true}catch(e){tkPersist=false}
+}
+function goTo(id,cls){
+  document.querySelectorAll(".screen").forEach(x=>x.classList.remove("on"));
+  $(id).classList.add("on");document.body.className=cls||"";
+}
+function readCard(){
+  const o=$("out"),tr=type==="train";
+  const rows=[...o.querySelectorAll(".row")].map(r=>[r.querySelector("label").textContent,r.querySelector("input").value.trim()]);
+  const pax=[...o.querySelectorAll(".p")].map(p=>{
+    const g=c=>(p.querySelector(c)||{value:""}).value.trim();
+    return tr?{name:g(".n"),coach:g(".c"),seat:g(".s"),type:g(".t")}:{name:g(".n"),seat:g(".s")};
+  });
+  return{head:["PNR",$("h").value.trim()],rows,pax,train:tr};
+}
+function saveTicket(){
+  const dir=document.querySelector(".seg button.on").dataset.dir,d=readCard(),kind=d.train?"train":"bus",all=tkAll();
+  const i=d.head[1]?all.findIndex(t=>t.d.head[1]===d.head[1]&&t.dir===dir&&t.kind===kind):-1;
+  const rec={id:i>=0?all[i].id:Date.now()+"-"+Math.random().toString(36).slice(2,7),dir,kind,saved:Date.now(),d};
+  if(i>=0)all[i]=rec;else all.push(rec);
+  tkStore(all);keepStorage();renderTickets();
+  $("tkmsg").innerHTML=(i>=0?"Updated the saved ":"Saved as ")+esc(dir)+" ticket."+(tkPersist?"":" This browser would not let me store it, so it is kept only until you close this page.")+" <button class=\"btn sm ghost\" onclick=\"openTickets()\">View my tickets</button>";
+}
+const rv=(d,l)=>((d.rows.find(r=>r[0]===l)||["",""])[1]||"");
+function tkCard(t){
+  const d=t.d,tr=t.kind==="train";
+  const route=[rv(d,"From"),rv(d,"To")].filter(Boolean).join(" → ")||"Route not found";
+  const when=tr?rv(d,"Departure"):[rv(d,"Date of journey"),rv(d,"Departure time")].filter(Boolean).join(" · ");
+  const seats=d.pax.map(p=>[p.name,tr?[p.coach,p.seat].filter(Boolean).join("/"):p.seat].filter(Boolean).join(" · ")).filter(Boolean).join("; ");
+  return `<div class="tk ${t.kind}"><div class="t1">${tr?"Train"+(rv(d,"Train")?" · "+esc(rv(d,"Train")):""):"Bus"}</div>
+    <div class="t2">PNR ${esc(d.head[1]||"not found")} · ${esc(route)}</div>
+    <div class="t3">${esc([when,seats].filter(Boolean).join(" · "))}</div>
+    <div class="acts"><button class="btn sm" data-o="${t.id}">View</button><button class="btn sm ghost" data-x="${t.id}">Delete</button></div></div>`;
+}
+function renderTickets(){
+  const all=tkAll(),n=dir=>all.filter(t=>t.dir===dir).length;
+  $("tkcount").textContent=all.length?all.length+" saved ("+n("Onward")+" onward, "+n("Return")+" return)":"Not saved yet";
+  $("tkitems").innerHTML=["Onward","Return"].map(dir=>{
+    const l=all.filter(t=>t.dir===dir).sort((a,b)=>b.saved-a.saved);
+    return `<h2 class="tkh">${dir} <small>${l.length?l.length+" saved":""}</small></h2>`+(l.length?l.map(tkCard).join(""):`<p class="note">No ${dir.toLowerCase()} ticket saved.</p>`);
+  }).join("");
+}
+function openTickets(){
+  renderTickets();$("tkview").innerHTML="";$("tklist").hidden=false;goTo("s4","idp");
+}
+function openTicket(id){
+  const t=tkAll().find(x=>x.id===id);if(!t)return;
+  $("tklist").hidden=true;document.body.className=t.kind;
+  $("tkview").innerHTML=`<button class="back" id="tkvback">&larr; All tickets</button>
+    <h1>${esc(t.dir)} journey</h1><p class="sub">${t.kind==="train"?"Train":"Bus"} ticket saved on this device.</p>`+cardHTML(t.d,true)+
+    `<p><button class="btn ghost" onclick="${ids.length?"openViewer(0)":"goIds()"}">${ids.length?"Show ID proof":"Save ID proof"}</button></p>`;
+  $("tkvback").onclick=openTickets;
+  window.scrollTo(0,0);
+}
+$("tkstub").onclick=openTickets;
+$("tkback").onclick=()=>goTo("s1","");
+$("tkitems").onclick=e=>{
+  const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.o)return openTicket(b.dataset.o);
+  if(b.dataset.x){
+    if(b.dataset.armed){clearTimeout(tkTimer);tkStore(tkAll().filter(t=>t.id!==b.dataset.x));return renderTickets()}
+    b.dataset.armed="1";b.textContent="Tap again to delete";
+    tkTimer=setTimeout(()=>{b.textContent="Delete";delete b.dataset.armed},3000);
+  }
+};
+refreshIds();
+renderTickets();
+
+/* ---------- install as an app + offline ---------- */
+function keepStorage(){try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}}
+let deferred=null;
+const standalone=()=>matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+function showInstall(){
+  const el=$("inst");
+  if(standalone()){el.hidden=true;return}
+  if(deferred){
+    el.innerHTML='<button class="btn">Install Wallet on this phone</button>';el.hidden=false;
+    el.querySelector("button").onclick=async()=>{deferred.prompt();try{await deferred.userChoice}catch(e){}deferred=null;el.hidden=true};
+  }else if(/iPad|iPhone|iPod/.test(navigator.userAgent)){
+    el.innerHTML='<p class="note">To install Wallet on this iPhone: tap Share, then Add to Home Screen. Install it before saving tickets, because the installed app keeps its own saved items.</p>';el.hidden=false;
+  }
+}
+addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;showInstall()});
+addEventListener("appinstalled",()=>{deferred=null;$("inst").hidden=true});
+showInstall();
+if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol))navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
