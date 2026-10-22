@@ -134,6 +134,7 @@ button,.btn{-webkit-tap-highlight-color:transparent;touch-action:manipulation;mi
       <svg viewBox="0 0 48 48"><rect x="10" y="6" width="28" height="30" rx="6"/><path d="M10 22h28M17 42l5-6M31 42l-5-6"/><circle cx="17" cy="29" r="1.5"/><circle cx="31" cy="29" r="1.5"/></svg></button>
   </div>
   <div id="inst" hidden style="margin-top:22px"></div>
+  <details id="chk"><summary>Why is this app not in my Share menu?</summary><div id="chkout" class="note"></div></details>
 </section>
 
 <section id="s2" class="screen">
@@ -424,7 +425,7 @@ function parseTrain(t){
   const pnr=pick(t,[/\bPNR\b[^\d]{0,80}?(\d{10})\b/i])||((t.match(/\b\d{10}\b/)||[""])[0]);
   const tn=pick(t,[/Train\s*(?:No\.?|Number)?[^\n\d]{0,25}(\d{5})/i,/\b(\d{5})\s*[\/\-]\s*[A-Z]/]);
   const nm=t.match(/\b\d{5}\s*[\/\-]\s*([A-Z][A-Z0-9 .&'\-]{2,40})/);
-  const tname=nm?clean(nm[1].replace(/\s+(?:SLEEPER CLASS|AC 3 TIER|AC 2 TIER|AC FIRST CLASS|AC CHAIR CAR|AC 3 ECONOMY|SECOND SEATING|FIRST CLASS|EXECUTIVE CHAIR CAR|EXECUTIVE ANUBHUTI|VISTADOME[A-Z ]*|THIRD AC|SECOND AC|FIRST AC)\b.*$/,"")):"";
+  const tname=nm?clean(nm[1].replace(/\s+(?:SLEEPER CLASS|AC 3 TIER|AC 2 TIER|AC FIRST CLASS|AC CHAIR CAR|CHAIR CAR|AC 3 ECONOMY|SECOND SEATING|FIRST CLASS|EXECUTIVE CHAIR CAR|EXECUTIVE ANUBHUTI|VISTADOME[A-Z ]*|THIRD AC|SECOND AC|FIRST AC)\b.*$/,"")):"";
 
   /* passengers: only look inside the Passenger Details block */
   const a=t.search(/Passenger\s*Details/i);
@@ -823,6 +824,27 @@ function showInstall(){
 }
 addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;showInstall()});
 addEventListener("appinstalled",()=>{deferred=null;$("inst").hidden=true});
+/* ---------- share-menu checker ---------- */
+$("chk").addEventListener("toggle",async()=>{
+  if(!$("chk").open)return;
+  const o=$("chkout"),L=[],add=(g,t)=>L.push((g?"OK: ":"FIX: ")+t);
+  o.textContent="Checking…";
+  add(location.protocol==="https:"||location.hostname==="localhost","Page is served over HTTPS (needed to install)");
+  add((/Android/i.test(navigator.userAgent)&&/Chrome/i.test(navigator.userAgent)&&!/SamsungBrowser|Firefox|Edg|OPR/i.test(navigator.userAgent))||standalone(),"Opened in Chrome on Android, or inside the installed app (other browsers may not add a share target)");
+  try{const r=await navigator.serviceWorker.getRegistration();add(!!(r&&r.active),"Service worker is active")}catch(e){add(false,"Service worker is not available here")}
+  try{
+    const href=document.querySelector("link[rel=manifest]").href,m=await (await fetch(href,{cache:"no-store"})).json();
+    const f=m.share_target&&m.share_target.params&&m.share_target.params.files;
+    add(!!f,"Manifest declares a share target for files");
+    add(m.display==="standalone"&&!!m.start_url,"Manifest is installable (standalone and start_url)");
+    for(const n of [192,512]){
+      const ic=(m.icons||[]).find(i=>i.sizes===n+"x"+n);let good=false;
+      if(ic)good=await new Promise(res=>{const im=new Image();im.onload=()=>res(im.naturalWidth>=n);im.onerror=()=>res(false);im.src=new URL(ic.src,href).href});
+      add(good,n+"x"+n+" icon loads"+(ic?"":" (missing from manifest)"));
+    }
+  }catch(e){add(false,"Manifest could not be read")}
+  o.innerHTML=L.map(x=>"<div>"+esc(x)+"</div>").join("")+"<div style=\"margin-top:8px\">If all are OK: delete the old home-screen icon, open the site in Chrome, choose menu &gt; Install app (not just Add to Home screen), then in the share sheet swipe to the second page of apps.</div>";
+});
 showInstall();
 if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol))navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
