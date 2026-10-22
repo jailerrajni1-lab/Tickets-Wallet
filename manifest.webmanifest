@@ -2,7 +2,7 @@
   "id": "./",
   "name": "Wallet - Ticket Analyser",
   "short_name": "Wallet",
-  "description": "Read KSRTC bus and IRCTC train tickets, keep them handy, get reminders.",
+  "description": "Read KSRTC bus and IRCTC train tickets and keep them handy with your ID proof.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
