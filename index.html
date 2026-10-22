@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Wallet</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#14213d">
@@ -17,7 +17,7 @@
 :root{--bg:#e8edf1;--ink:#14213d;--mute:#5b6b82;--card:#fff;--line:#c9d3de;--bus:#0f766e;--train:#3730a3;--acc:var(--bus)}
 body.train{--acc:var(--train)}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,sans-serif;min-height:100vh;display:flex;justify-content:center;padding:28px 16px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,sans-serif;min-height:100vh;display:flex;justify-content:center;padding:max(28px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(28px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
 main{width:100%;max-width:560px}
 h1{font-size:2rem;font-weight:800;margin:0 0 6px;letter-spacing:-.02em}
 p.sub{color:var(--mute);margin:0 0 26px;line-height:1.5;display:block}
@@ -97,6 +97,16 @@ details{margin-top:12px;color:var(--mute);font-size:.85rem}pre{white-space:pre-w
 @media(max-width:480px){.p.tr{grid-template-columns:.8fr .9fr 1.5fr}.p.tr .f.nm{grid-column:1/-1}}
 @media(max-width:420px){.row{flex-direction:column;align-items:flex-start;gap:2px}.row label{flex:none}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+.modal{position:fixed;inset:0;background:rgba(10,16,30,.6);display:none;align-items:flex-end;justify-content:center;z-index:20;padding:12px}
+.modal.on{display:flex}
+.sheet{background:var(--card);border-radius:18px;padding:20px;width:100%;max-width:520px;display:flex;flex-direction:column;gap:12px;margin-bottom:env(safe-area-inset-bottom)}
+.sheet h2{margin:0;font-size:1.25rem}
+.sheet .btn{text-align:center}
+.sheet input[type=datetime-local]{font:inherit;font-size:16px;padding:10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}.chips .btn[disabled]{opacity:.4}
+.rem{background:var(--card);border-radius:14px;padding:12px 16px;margin:8px 0;display:flex;gap:10px;align-items:center;justify-content:space-between}
+.rem small{color:var(--mute);display:block;word-break:break-word}
+button,.btn{-webkit-tap-highlight-color:transparent;touch-action:manipulation;min-height:40px}
 </style>
 </head>
 <body>
@@ -112,6 +122,11 @@ details{margin-top:12px;color:var(--mute);font-size:.85rem}pre{white-space:pre-w
       <svg viewBox="0 0 48 48"><rect x="6" y="11" width="36" height="26" rx="4"/><circle cx="18" cy="22" r="4"/><path d="M11 32c1-4 4-6 7-6s6 2 7 6M29 20h8M29 26h8"/></svg></button>
   </div>
   <h2 class="grp">Add a ticket</h2>
+  <div class="pick">
+    <button class="stub" style="--c:#b45309" data-t="auto"><span><b>Upload ticket</b><small>Detects KSRTC bus or IRCTC train for you</small></span>
+      <svg viewBox="0 0 48 48"><path d="M24 34V12M15 21l9-9 9 9M10 38h28"/></svg></button>
+  </div>
+  <h2 class="grp">Or choose the type yourself</h2>
   <div class="pick">
     <button class="stub" style="--c:var(--bus)" data-t="bus"><span><b>Bus</b><small>Read a KSRTC ticket</small></span>
       <svg viewBox="0 0 48 48"><rect x="8" y="7" width="32" height="30" rx="5"/><path d="M8 24h32M14 37v4M34 37v4"/><circle cx="16" cy="31" r="1.5"/><circle cx="32" cy="31" r="1.5"/></svg></button>
@@ -155,7 +170,7 @@ details{margin-top:12px;color:var(--mute);font-size:.85rem}pre{white-space:pre-w
     <button class="back" id="tkback">&larr; Back</button>
     <h1>My tickets</h1>
     <p class="sub">Saved on this device only. Onward and return journeys are kept apart so the right one is a tap away.</p>
-    <div id="tkitems"></div>
+    <div id="tkitems"></div><div id="remitems"></div>
   </div>
   <div id="tkview"></div>
 </section>
@@ -166,6 +181,8 @@ details{margin-top:12px;color:var(--mute);font-size:.85rem}pre{white-space:pre-w
   <div class="vbar"><button class="btn light" id="vprev">Previous</button><span id="vlabel"></span><button class="btn light" id="vnext">Next</button><button class="btn light" id="vclose">Close</button></div>
 </div>
 
+<div class="modal" id="modal" role="dialog" aria-modal="true"><div class="sheet" id="sheet"></div></div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.1.1/tesseract.min.js"></script>
 <script>
@@ -173,9 +190,9 @@ const $=id=>document.getElementById(id);
 let type="bus";
 
 document.querySelectorAll(".stub[data-t]").forEach(b=>b.onclick=()=>{
-  type=b.dataset.t; document.body.className=type;
-  $("t2").textContent=type==="bus"?"Upload your bus ticket":"Upload your train ticket";
-  $("s2sub").textContent=type==="bus"?"KSRTC ticket. I will pick out PNR, seat number, route and date.":"IRCTC ticket. I will pick out PNR, train, route, departure and arrival, and each passenger's coach, seat number and seat type.";
+  type=b.dataset.t; document.body.className=type==="auto"?"":type;
+  $("t2").textContent=type==="auto"?"Upload your ticket":type==="bus"?"Upload your bus ticket":"Upload your train ticket";
+  $("s2sub").textContent=type==="auto"?"KSRTC bus or IRCTC train. I will work out which it is, then read it.":type==="bus"?"KSRTC ticket. I will pick out PNR, seat number, route and date.":"IRCTC ticket. I will pick out PNR, train, route, departure and arrival, and each passenger's coach, seat number and seat type.";
   reset(); $("s1").classList.remove("on"); $("s2").classList.add("on");
 });
 $("back").onclick=()=>{$("s2").classList.remove("on");$("s1").classList.add("on");document.body.className=""};
@@ -200,10 +217,19 @@ async function run(file){
     else return fail("Please upload an image (PNG, JPG) or a PDF.");
     $("status").hidden=true;
     if(text.trim().length<20) return fail("Could not read any text. Try a sharper, straight-on screenshot or the original PDF.");
-    show(type==="bus"?parseBus(text):parseTrain(text),text);
+    const det=detect(text)||(type==="auto"?"":type);
+    if(!det)return askType(text);
+    type=det;document.body.className=det;
+    $("t2").textContent=det==="bus"?"KSRTC bus ticket":"IRCTC train ticket";
+    show(det==="bus"?parseBus(text):parseTrain(text),text);
   }catch(e){fail("Something went wrong while reading the ticket ("+(e.message||e)+"). Check your internet connection and try again.")}
 }
 
+function askType(text){
+  fail("I could not tell whether this is a KSRTC bus ticket or an IRCTC train ticket. Choose one:");
+  $("err").insertAdjacentHTML("beforeend",' <button class="btn sm" data-pt="bus">Bus</button> <button class="btn sm" data-pt="train">Train</button>');
+  $("err").querySelectorAll("[data-pt]").forEach(b=>b.onclick=()=>{type=b.dataset.pt;document.body.className=type;$("err").hidden=true;show(type==="bus"?parseBus(text):parseTrain(text),text)});
+}
 async function ocr(src,label){
   const r=await Tesseract.recognize(src,type==="bus"?"eng+kan":"eng",{logger:m=>{if(m.status==="recognizing text")prog(label+"…",m.progress);else prog("Loading reader…")}});
   return r.data.text;
@@ -343,22 +369,58 @@ function trainRoute(t){
   return findRoute(t);
 }
 
-/* Reads the Current Status (last status on the line), e.g. CNF/S2/62/UPPER -> coach S2, seat 62, type Upper */
+function segParse(seg){
+  const m=seg.match(new RegExp("^("+STAT+")\\b\\s*\\/?\\s*(.*)$","i"));
+  const stat=m[1].toUpperCase(),parts=m[2].replace(/[|\\!]/g,"/").split("/").map(clean).filter(Boolean);
+  let coach="",num="",typ="",q=0;
+  const f=parts[0]&&parts[0].match(/^([A-Z]{1,2}\d{1,2}[A-Z]?)[Il1]([0-9SO]{1,3})$/);
+  if(parts.length>=2&&/^[A-Z]{1,2}\d{0,2}[A-Z]?$/i.test(parts[0])&&!/^(?:WL|RAC|CNF)$/i.test(parts[0])&&/^\d+/.test(parts[1])){
+    coach=parts[0].toUpperCase();num=parts[1];typ=parts.slice(2).join(" ");q=2;
+  }else if(parts.length&&/^\d+$/.test(parts[0])&&stat==="CNF"){
+    num=parts[0];typ=parts.slice(1).join(" ");q=2;
+  }else if(f){ /* "/" read as "I", "5" read as "S" */
+    coach=f[1];num=f[2].replace(/S/g,"5").replace(/O/g,"0");typ=parts.slice(1).join(" ");q=1;
+  }else num=parts.join(" / ");
+  return{coach,seat:(stat==="CNF"?num:(stat+" "+num).trim()),type:(t=>/^(?:WS|MS|AS|SL|SU|SM|LB|MB|UB|L|M|U|W)$/i.test(t)?t.toUpperCase():titleCase(t))(typ.replace(/[^A-Za-z ]/g,"").trim()),q};
+}
+/* Reads the Current Status; the screen shows booking and current status, so use whichever copy read best */
 function trainStatus(rest){
   const segs=rest.split(new RegExp("(?=\\b(?:"+STAT+")\\b)","i")).map(clean).filter(x=>new RegExp("^(?:"+STAT+")\\b","i").test(x));
   if(!segs.length)return null;
-  const m=segs[segs.length-1].match(new RegExp("^("+STAT+")\\b\\s*\\/?\\s*(.*)$","i"));
-  const stat=m[1].toUpperCase(),parts=m[2].split("/").map(clean).filter(Boolean);
-  let coach="",num="",typ="";
-  if(parts.length>=2&&/^[A-Z]{1,2}\d{0,2}$/i.test(parts[0])&&!/^(?:WL|RAC|CNF)$/i.test(parts[0])&&/^\d+/.test(parts[1])){
-    coach=parts[0].toUpperCase();num=parts[1];typ=parts.slice(2).join(" ");
-  }else if(parts.length&&/^\d+$/.test(parts[0])&&stat==="CNF"){
-    num=parts[0];typ=parts.slice(1).join(" ");
-  }else num=parts.join(" / ");
-  return{coach,seat:(stat==="CNF"?num:(stat+" "+num).trim()),type:titleCase(typ)};
+  return segs.map(segParse).reduce((b,r)=>r.q>=b.q?r:b);
 }
 
+/* ---------- auto-detect: KSRTC bus vs IRCTC train ---------- */
+function detect(t){
+  const s=t.replace(/\s+/g," ");let b=0,r=0;
+  [/ksrtc|karnataka state road/i,/trip\s*code/i,/ob\s*reference/i,/platform\s*no/i,/boarding\s*point/i,/alighting\s*point/i,/start\s*place/i,/\bK[S5]\s?\d{7,10}\b/i,/[\u0C80-\u0CFF]{3}/].forEach(x=>{if(x.test(s))b++});
+  [/irctc|indian\s*railway|railways?\s*act|\bERS\b|electronic\s*reservation/i,/\b(?:CNF|RAC|GNWL|RLWL|PQWL|RSWL|TQWL|WL)\s*\/\s*(?:[A-Z]{1,2}\d{0,2}[A-Z]?\s*\/\s*)?\d+/,/\b(?:chair\s*car|sleeper|AC\s*[123]\s*tier)\b/i,/\(\d{5}\)|train\s*(?:no|name)/i,/chart\s*(?:not\s*)?prepared|\bPNR\b.{0,40}\b\d{10}\b/i,/\bquota\b/i].forEach(x=>{if(x.test(s))r++});
+  return b>r?"bus":r>b?"train":"";
+}
+/* IRCTC mobile-app "booking details" screenshot (not the ERS slip) */
+function parseTrainApp(t){
+  if(!/Passenger\s*Information/i.test(t)||/Passenger\s*Details/i.test(t)||!new RegExp("\\b(?:"+STAT+")\\s*\\/","i").test(t))return null;
+  const tm=t.match(/\b([01]?\d|2[0-3]):([0-5]\d)\b[\s\S]{0,40}?\b([01]?\d|2[0-3]):([0-5]\d)\b/);
+  const hm=(h,m)=>h.padStart(2,"0")+":"+m;
+  const st=[...t.matchAll(/([A-Za-z][A-Za-z.&' \-]{2,38}?)\s*\(([A-Z]{2,5})\)/g)].map(m=>titleCase(m[1])+" ("+m[2]+")");
+  const days=[...t.matchAll(/(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)[a-z]*,?\s*(\d{1,2})\s+([A-Za-z]{3})/gi)];
+  const yr=(t.match(/\b\d{1,2}\s+[A-Za-z]{3,9}\s+(20\d\d)\b/)||[])[1]||new Date().getFullYear();
+  const dt=d=>d?d[1]+" "+titleCase(d[2])+" "+yr:"";
+  const nm=t.match(/\b([A-Z][A-Z .&'\-]{2,40}?)\s*\((\d{5})\)/);
+  const pnr=(t.match(/PNR\s*:?\s*(\d{10})\b/i)||[])[1]||"";
+  const sec=t.split(/Passenger\s*Information/i)[1]||"",names=[],pax=[];
+  sec.split("\n").forEach(l=>{
+    const n=l.match(/^\s*\d{1,2}[.)]?\s+([A-Za-z][A-Za-z .'\-]{1,40}?)\s*$/);if(n)names.push(clean(n[1]));
+    if(new RegExp("\\b(?:"+STAT+")\\s*\\/","i").test(l)){const s=trainStatus(l);if(s)pax.push({name:"",coach:s.coach,seat:s.seat,type:s.type})}
+  });
+  pax.forEach((p,i)=>p.name=names[i]||"");
+  if(!pax.length)pax.push({name:"",coach:"",seat:"",type:""});
+  return{head:["PNR",pnr],rows:[["Train",nm?nm[2]+" · "+clean(nm[1]):""],["From",st[0]||""],["To",st[1]||""],
+    ["Departure",tm&&days[0]?hm(tm[1],tm[2])+" · "+dt(days[0]):""],["Arrival",tm&&days[0]?hm(tm[3],tm[4])+" · "+dt(days[1]||days[0]):""]],pax,train:true};
+}
 function parseTrain(t){
+  const app=parseTrainApp(t);if(app)return app;
+
   const pnr=pick(t,[/\bPNR\b[^\d]{0,80}?(\d{10})\b/i])||((t.match(/\b\d{10}\b/)||[""])[0]);
   const tn=pick(t,[/Train\s*(?:No\.?|Number)?[^\n\d]{0,25}(\d{5})/i,/\b(\d{5})\s*[\/\-]\s*[A-Z]/]);
   const nm=t.match(/\b\d{5}\s*[\/\-]\s*([A-Z][A-Z0-9 .&'\-]{2,40})/);
@@ -423,7 +485,7 @@ function show(d,raw){
     </div>
     <p class="note">${miss?"Some details were not found. Fill them in from your ticket.":"Check these against your ticket."} Every field can be edited, and the saved copy uses what you see here. The ticket is read in your browser and is not uploaded anywhere.</p>
     <details><summary>Text read from the ticket</summary><pre>${esc(raw)}</pre></details>
-    <p style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" onclick="document.getElementById('file').click()">Upload another ticket</button>
+    ${actBtns("")}<p style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" onclick="document.getElementById('file').click()">Upload another ticket</button>
     <button class="btn ghost" onclick="${ids.length?"openViewer(0)":"goIds()"}">${ids.length?"Show ID proof":"Save ID proof"}</button></p>`;
   document.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>document.querySelectorAll(".seg button").forEach(x=>{x.classList.toggle("on",x===b);x.setAttribute("aria-checked",x===b)}));
   $("tksave").onclick=saveTicket;
@@ -589,6 +651,7 @@ function tkCard(t){
     <div class="acts"><button class="btn sm" data-o="${t.id}">View</button><button class="btn sm ghost" data-x="${t.id}">Delete</button></div></div>`;
 }
 function renderTickets(){
+  if(typeof renderRems==="function")renderRems();
   const all=tkAll(),n=dir=>all.filter(t=>t.dir===dir).length;
   $("tkcount").textContent=all.length?all.length+" saved ("+n("Onward")+" onward, "+n("Return")+" return)":"Not saved yet";
   $("tkitems").innerHTML=["Onward","Return"].map(dir=>{
@@ -603,7 +666,7 @@ function openTicket(id){
   const t=tkAll().find(x=>x.id===id);if(!t)return;
   $("tklist").hidden=true;document.body.className=t.kind;
   $("tkview").innerHTML=`<button class="back" id="tkvback">&larr; All tickets</button>
-    <h1>${esc(t.dir)} journey</h1><p class="sub">${t.kind==="train"?"Train":"Bus"} ticket saved on this device.</p>`+cardHTML(t.d,true)+
+    <h1>${esc(t.dir)} journey</h1><p class="sub">${t.kind==="train"?"Train":"Bus"} ticket saved on this device.</p>`+cardHTML(t.d,true)+actBtns(t.id)+
     `<p><button class="btn ghost" onclick="${ids.length?"openViewer(0)":"goIds()"}">${ids.length?"Show ID proof":"Save ID proof"}</button></p>`;
   $("tkvback").onclick=openTickets;
   window.scrollTo(0,0);
@@ -614,13 +677,135 @@ $("tkitems").onclick=e=>{
   const b=e.target.closest("button");if(!b)return;
   if(b.dataset.o)return openTicket(b.dataset.o);
   if(b.dataset.x){
-    if(b.dataset.armed){clearTimeout(tkTimer);tkStore(tkAll().filter(t=>t.id!==b.dataset.x));return renderTickets()}
+    if(b.dataset.armed){clearTimeout(tkTimer);tkStore(tkAll().filter(t=>t.id!==b.dataset.x));remStore(remAll().filter(r=>r.tid!==b.dataset.x));return renderTickets()}
     b.dataset.armed="1";b.textContent="Tap again to delete";
     tkTimer=setTimeout(()=>{b.textContent="Delete";delete b.dataset.armed},3000);
   }
 };
+/* ---------- shared-in files (Android share sheet -> service worker -> here) ---------- */
+async function intakeShared(){
+  if(!/[?&]shared=/.test(location.search))return;
+  history.replaceState(null,"",location.pathname);
+  try{
+    const c=await caches.open("ta-share"),ks=await c.keys();if(!ks.length)return;
+    const rs=await c.match(ks[0]),blob=await rs.blob(),name=decodeURIComponent(rs.headers.get("x-name")||"ticket");
+    for(const k of ks)await c.delete(k);
+    type="auto";document.body.className="";
+    $("t2").textContent="Reading shared ticket";$("s2sub").textContent="Shared from another app. Working out whether it is a bus or train ticket.";
+    reset();document.querySelectorAll(".screen").forEach(x=>x.classList.remove("on"));$("s2").classList.add("on");
+    run(new File([blob],name,{type:blob.type||rs.headers.get("content-type")||""}));
+  }catch(e){}
+}
+/* ---------- journey time, reminders, alarms ---------- */
+const MONI={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
+const pad=n=>String(n).padStart(2,"0");
+const loc=ms=>{const d=new Date(ms);return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"T"+pad(d.getHours())+":"+pad(d.getMinutes())};
+const fmt=ms=>new Date(ms).toLocaleString("en-IN",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+function journeyTime(d){
+  const txt=d.train?rv(d,"Departure"):rv(d,"Date of journey")+" "+rv(d,"Departure time");
+  const tm=txt.match(/(\d{1,2})\s*:\s*(\d{2})/),dm=txt.match(/(\d{1,2})[\s\-\/.]+([A-Za-z]{3,9}|\d{1,2})[\s\-\/.,]+(\d{2,4})/);
+  if(!tm||!dm)return null;
+  const mo=/\d/.test(dm[2])?+dm[2]-1:MONI[dm[2].slice(0,3).toLowerCase()];let y=+dm[3];if(y<100)y+=2000;
+  return mo==null||isNaN(mo)?null:new Date(y,mo,+dm[1],+tm[1],+tm[2]).getTime();
+}
+const lab=d=>[d.train?"Train":"Bus",d.train?(rv(d,"Train").split(" · ")[0]||""):"",[rv(d,"From"),rv(d,"To")].filter(Boolean).join(" to ")].filter(Boolean).join(" ");
+let remMem=[],remTimer=null;
+const remAll=()=>{try{return JSON.parse(localStorage.getItem("ta-rem")||"[]")}catch(e){return remMem.slice()}};
+const remStore=a=>{remMem=a.slice();try{localStorage.setItem("ta-rem",JSON.stringify(a))}catch(e){}};
+const rid=()=>Date.now()+"-"+Math.random().toString(36).slice(2,6);
+const actBtns=tid=>`<div class="savebox"><div class="sl">Before you travel</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-a="remind" data-tid="${tid}">Tap to Remind</button><button class="btn ghost" data-a="alarm" data-tid="${tid}">Set an alarm</button></div></div>`;
+const modal=h=>{$("sheet").innerHTML=h;$("modal").classList.add("on")};
+const closeModal=()=>$("modal").classList.remove("on");
+$("modal").onclick=e=>{if(e.target.id==="modal"||(e.target.closest&&e.target.closest("[data-close]")))closeModal()};
+document.addEventListener("click",e=>{const b=e.target.closest("[data-a]");if(b)openAct(b.dataset.a,b.dataset.tid||"")});
+
+function icsFile(label,startMs,trig){
+  const f=ms=>{const d=new Date(ms);return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+"T"+pad(d.getHours())+pad(d.getMinutes())+"00"};
+  const s=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Wallet//EN","BEGIN:VEVENT","UID:"+rid()+"@wallet","DTSTAMP:"+new Date().toISOString().replace(/[-:]|\.\d+/g,""),"DTSTART:"+f(startMs),"DTEND:"+f(startMs+36e5),"SUMMARY:"+label.replace(/[,;]/g," "),"BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+label.replace(/[,;]/g," "),"TRIGGER:"+trig,"END:VALARM","END:VEVENT","END:VCALENDAR"].join("\r\n");
+  return new File([s],"journey.ics",{type:"text/calendar"});
+}
+async function giveFile(f){
+  try{if(navigator.canShare&&navigator.canShare({files:[f]}))return await navigator.share({files:[f],title:f.name})}catch(e){if(e.name==="AbortError")return}
+  const a=document.createElement("a");a.href=URL.createObjectURL(f);a.download=f.name;document.body.appendChild(a);a.click();a.remove();
+}
+async function notify(r){
+  const t="Journey in about 2 hours",o={body:r.label+" · departs "+fmt(r.j),tag:r.id};
+  try{if(Notification.permission==="granted"){const reg=await navigator.serviceWorker.ready;return reg.showNotification(t,o)}}catch(e){}
+  alert(t+"\n"+o.body);
+}
+async function trySchedule(r){
+  try{
+    if(typeof TimestampTrigger==="undefined"||Notification.permission!=="granted")return;
+    const reg=await navigator.serviceWorker.ready;
+    await reg.showNotification("Journey in about 2 hours",{body:r.label+" · departs "+fmt(r.j),tag:r.id,showTrigger:new TimestampTrigger(r.at)});
+  }catch(e){}
+}
+function checkDue(){
+  const a=remAll();let ch=false;
+  a.forEach(r=>{if(r.kind==="remind"&&!r.fired&&Date.now()>=r.at&&Date.now()<r.j+36e5){r.fired=true;ch=true;notify(r)}});
+  if(ch){remStore(a);renderRems()}
+}
+setInterval(checkDue,30000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkDue()});
+
+function openAct(kind,tid){
+  const d=tid?(tkAll().find(x=>x.id===tid)||{}).d:readCard();if(!d)return;
+  const jt=journeyTime(d),label=lab(d);
+  if(kind==="remind"){
+    modal(`<h2>Remind me before I travel?</h2><p class="note" style="margin:0">One reminder, 2 hours before departure. Check the journey time:</p>
+      <input type="datetime-local" id="jt" value="${jt?loc(jt):""}"><div class="note" id="jtx" style="margin:0"></div>
+      <button class="btn" id="yes">Yes, remind me</button><button class="btn ghost" data-close>No thanks</button><div class="note" id="am" role="status" style="margin:0"></div>`);
+    const upd=()=>{const v=$("jt").value;$("jtx").textContent=v?"Reminder time: "+fmt(new Date(v).getTime()-72e5):"Enter the departure date and time."};
+    $("jt").oninput=upd;upd();
+    $("yes").onclick=async()=>{
+      const v=$("jt").value;if(!v)return;const j=new Date(v).getTime(),at=j-72e5;
+      if(at<=Date.now()){$("am").textContent="Departure is less than 2 hours away, so that reminder time has already passed. Use Set an alarm instead.";return}
+      const r={id:rid(),kind:"remind",tid,label,j,at,fired:false};
+      remStore(remAll().concat(r));renderRems();
+      let perm="denied";try{perm=Notification.permission==="default"?await Notification.requestPermission():Notification.permission}catch(e){}
+      await trySchedule(r);
+      $("am").innerHTML="Reminder saved for "+esc(fmt(at))+". "+(perm==="granted"?"Phones can stop web apps from running in the background, so the notification is only certain if the app is opened or kept alive. For a guaranteed alert, add it to your calendar too. ":"Notifications are blocked for this app, so use the calendar alert. ")+'<button class="btn sm" id="ics">Add calendar alert</button>';
+      $("ics").onclick=()=>giveFile(icsFile(label,j,"-PT2H"));
+    };
+  }else{
+    modal(`<h2>Set an alarm</h2><p class="note" style="margin:0">One-time alarm. Choose when it should ring:</p>
+      <div class="chips">${[1,2,3].map(h=>`<button class="btn sm ghost" data-h="${h}"${jt?"":" disabled"}>${h} h before</button>`).join("")}</div>
+      <input type="datetime-local" id="at" value="${jt?loc(jt-72e5):""}"><div class="note" id="atx" style="margin:0"></div>
+      <button class="btn" id="go">Open Clock and set alarm</button><button class="btn ghost" data-close>Cancel</button><div class="note" id="am" role="status" style="margin:0"></div>`);
+    const upd=()=>{const v=$("at").value,a=new Date(v).getTime();$("atx").textContent=!v?"":a-Date.now()>864e5?"Clock alarms ring at the next "+pad(new Date(a).getHours())+":"+pad(new Date(a).getMinutes())+", so for a journey more than 24 hours away set it closer to the day.":"Alarm: "+fmt(a)};
+    $("at").oninput=upd;upd();
+    document.querySelectorAll("[data-h]").forEach(b=>b.onclick=()=>{$("at").value=loc(jt-b.dataset.h*36e5);upd()});
+    $("go").onclick=()=>{
+      const a=new Date($("at").value).getTime();
+      if(!a||a<=Date.now()){$("am").textContent="Choose a time in the future.";return}
+      const dt=new Date(a),H=dt.getHours(),M=dt.getMinutes(),t=pad(H)+":"+pad(M);
+      remStore(remAll().concat({id:rid(),kind:"alarm",tid,label,j:a,at:a,fired:true}));renderRems();
+      if(/Android/i.test(navigator.userAgent))location.href="intent:#Intent;action=android.intent.action.SET_ALARM;i.android.intent.extra.alarm.HOUR="+H+";i.android.intent.extra.alarm.MINUTES="+M+";S.android.intent.extra.alarm.MESSAGE="+encodeURIComponent(label)+";B.android.intent.extra.alarm.SKIP_UI=false;end";
+      setTimeout(()=>{if(document.visibilityState==="visible"){
+        $("am").innerHTML="This browser cannot open Clock directly. Set an alarm for <b>"+t+"</b> in your Clock app (on iPhone: say \"Hey Siri, set an alarm for "+t+"\"). Or get a calendar alert at that time: "+'<button class="btn sm" id="ics">Add calendar alert</button>';
+        $("ics").onclick=()=>giveFile(icsFile(label+" (alarm)",a,"-PT0M"));
+      }},1800);
+    };
+  }
+}
+let remDel=null;
+function renderRems(){
+  const el=$("remitems");if(!el)return;
+  const a=remAll().sort((x,y)=>x.at-y.at);
+  el.innerHTML=`<h2 class="tkh">Reminders and alarms <small>${a.length?a.length+" set":""}</small></h2>`+(a.length?a.map(r=>`<div class="rem"><div><b>${r.kind==="alarm"?"Alarm":"Reminder"}</b> · ${esc(fmt(r.at))}<small>${esc(r.label)}${r.kind==="alarm"?" · also delete it in your Clock app":""}</small></div><button class="btn sm ghost" data-rd="${r.id}">Delete</button></div>`).join(""):`<p class="note">None set.</p>`);
+}
+document.addEventListener("click",async e=>{
+  const b=e.target.closest("[data-rd]");if(!b)return;
+  if(b.dataset.armed){
+    clearTimeout(remDel);remStore(remAll().filter(r=>r.id!==b.dataset.rd));
+    try{const reg=await navigator.serviceWorker.ready;(await reg.getNotifications({tag:b.dataset.rd})).forEach(n=>n.close())}catch(x){}
+    return renderRems();
+  }
+  b.dataset.armed="1";b.textContent="Tap again to delete";
+  remDel=setTimeout(()=>{b.textContent="Delete";delete b.dataset.armed},3000);
+});
 refreshIds();
 renderTickets();
+checkDue();intakeShared();
 
 /* ---------- install as an app + offline ---------- */
 function keepStorage(){try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}}
@@ -633,7 +818,7 @@ function showInstall(){
     el.innerHTML='<button class="btn">Install Wallet on this phone</button>';el.hidden=false;
     el.querySelector("button").onclick=async()=>{deferred.prompt();try{await deferred.userChoice}catch(e){}deferred=null;el.hidden=true};
   }else if(/iPad|iPhone|iPod/.test(navigator.userAgent)){
-    el.innerHTML='<p class="note">To install Wallet on this iPhone: tap Share, then Add to Home Screen. Install it before saving tickets, because the installed app keeps its own saved items.</p>';el.hidden=false;
+    el.innerHTML='<p class="note">To install Wallet on this iPhone: tap Share, then Add to Home Screen. Install it before saving tickets, because the installed app keeps its own saved items. Apple does not let web apps appear in the iPhone Share menu, so save the PDF or photo to Files or Photos first, then tap Upload ticket.</p>';el.hidden=false;
   }
 }
 addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;showInstall()});
