@@ -13,9 +13,9 @@
 <meta name="format-detection" content="telephone=no">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet" crossorigin="anonymous">
 <style>
-:root{--bg:#f4efe6;--ink:#2a2418;--mute:#7a6f5a;--card:#fff;--line:#e0d8c6;--bus:#0f766e;--train:#3730a3;--or:#b4560f;--acc:var(--bus)}
+:root{--bg:#f4efe6;--ink:#2a2418;--mute:#6b604c;--card:#fff;--line:#e0d8c6;--bus:#0f766e;--train:#3730a3;--or:#b4560f;--acc:var(--bus)}
 body.train{--acc:var(--train)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,sans-serif;min-height:100vh;display:flex;justify-content:center;padding:max(28px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(28px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
@@ -103,10 +103,6 @@ details{margin-top:12px;color:var(--mute);font-size:.85rem}pre{white-space:pre-w
 .sheet{background:var(--card);border-radius:18px;padding:20px;width:100%;max-width:520px;display:flex;flex-direction:column;gap:12px;margin-bottom:env(safe-area-inset-bottom)}
 .sheet h2{margin:0;font-size:1.25rem}
 .sheet .btn{text-align:center}
-.sheet input[type=datetime-local]{font:inherit;font-size:16px;padding:10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
-.chips{display:flex;gap:8px;flex-wrap:wrap}.chips .btn[disabled]{opacity:.4}
-.rem{background:var(--card);border-radius:14px;padding:12px 16px;margin:8px 0;display:flex;gap:10px;align-items:center;justify-content:space-between}
-.rem small{color:var(--mute);display:block;word-break:break-word}
 button,.btn{-webkit-tap-highlight-color:transparent;touch-action:manipulation;min-height:40px}
 
 /* ===== app shell (new interface) ===== */
@@ -123,7 +119,7 @@ main{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 .avatar:focus-visible,.rc:focus-visible,.dz:focus-visible,.tabbar button:focus-visible,.counts button:focus-visible,.tsel button:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
 .rc{all:unset;box-sizing:border-box;cursor:pointer;display:block;width:100%;position:relative;overflow:hidden;background:var(--c);color:#fff;border-radius:16px;padding:14px;margin:6px 0 12px}
 .rc.train{--c:var(--train)}.rc.bus{--c:var(--bus)}
-.rt{font-size:.68rem;letter-spacing:.05em;opacity:.88}
+.rt{display:flex;justify-content:space-between;gap:8px;font-size:.68rem;letter-spacing:.05em;opacity:.88}
 .rr{display:flex;align-items:center;gap:8px;margin-top:6px}
 .st{min-width:0;flex:0 1 38%}.st.r{text-align:right}
 .st b{display:block;font-size:1.4rem;font-weight:800;line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -169,7 +165,84 @@ main{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 .idform label{flex:0 0 64px}
 .btn.danger{background:#b42318}
 .btn.dangerline{background:transparent;color:#b42318;box-shadow:inset 0 0 1.5px 1.5px #b42318}
-#inst .btn{display:block;text-align:center;margin-top:16px}
+/* install: card on Home, steps per browser */
+.instcard{display:flex;gap:14px;align-items:flex-start;background:#fff;border-radius:16px;padding:14px 16px;margin-top:14px}
+.instcard svg.logo{flex:none;width:46px;height:31px;margin-top:2px}
+.instcard b{display:block;font-size:1.02rem}.instcard p{margin:2px 0 0;color:var(--mute);font-size:.9rem;line-height:1.4}
+.instcard .acts2{margin:10px 0 0}
+.steps{margin:0;padding-left:1.4em;display:flex;flex-direction:column;gap:9px;line-height:1.5}
+.steps li::marker{font-weight:800;color:var(--or)}
+.kbd{display:inline-flex;align-items:center;justify-content:center;min-width:1.7em;height:1.7em;padding:0 .3em;margin:0 1px;border-radius:7px;box-shadow:inset 0 0 0 1px var(--line);background:#fff;font-weight:800;line-height:1;vertical-align:-.35em}
+.kbd svg{width:1.05em;height:1.05em;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.instnote{color:var(--mute);font-size:.86rem;line-height:1.45;margin:0}
+.instpick{display:flex;flex-direction:column;gap:8px}.instpick>span{color:var(--mute);font-size:.86rem}
+/* read-only ticket fields: the reading is final, nothing to type into */
+.ticket input[readonly]{cursor:default}
+.row input[readonly]:hover,.row input[readonly]:focus{border-bottom-color:transparent}
+/* ID proof shortcut, top right of the ticket area */
+.dzh,.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.dzh{margin:4px 2px 8px}.dzh>span{color:var(--mute);font-size:.85rem;font-weight:600}
+.topbar{margin-bottom:14px}.topbar .back{margin-bottom:0}
+.idpill{all:unset;box-sizing:border-box;cursor:pointer;flex:none;display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:6px 14px 6px 11px;border-radius:999px;background:#fff;box-shadow:inset 0 0 0 1.5px var(--line);color:var(--ink);font-weight:600;font-size:.86rem;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+.idpill svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.idpill.has{background:#e3efe6;color:#27500a;box-shadow:none}
+.idpill:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+/* Tickets, option A: boarding passes */
+.dirsw{display:flex;gap:6px;padding:4px;background:#fff;border-radius:14px;margin:4px 0 16px}
+.dirsw button{all:unset;box-sizing:border-box;cursor:pointer;flex:1;display:flex;align-items:center;justify-content:center;gap:6px;min-height:44px;border-radius:10px;font-weight:600;color:var(--ink)}
+.dirsw button span{color:var(--mute)}
+.dirsw button.on{background:var(--ink);color:#fff}.dirsw button.on span{color:#fff;opacity:.75}
+.dirsw button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.pass{border-radius:18px;padding:16px;margin:0 0 14px;text-align:left}
+.pass .rt2{display:flex;justify-content:space-between;gap:10px;font-size:.8rem;opacity:.9}
+.pass .rt2 span:last-child{text-align:right}
+.pass .st b{white-space:normal;overflow-wrap:break-word;font-size:1.4rem}
+.pass .st{flex-basis:40%}
+.pass .tear{margin:16px -16px 12px}
+.pass .rf{font-size:.88rem}.pass .rf b{font-weight:800}
+.pass .pnr{font-size:.8rem;opacity:.9;margin-top:6px}
+.pass.past{--c:#e6dfd0;color:var(--ink);padding:14px 16px}
+.pass.past .rt2,.pass.past small{color:#5c5240;opacity:1}
+.pass.past .st b{font-size:1.15rem}
+.pass.past .mid svg{stroke:#5c5240}.pass.past .mid i{border-color:rgba(42,36,24,.25)}
+/* Home: all journeys on the next travel day */
+.hc .st{flex-basis:40%}.hc .st b{white-space:normal;overflow-wrap:break-word}
+.rc.done{--c:#e6dfd0;color:var(--ink)}
+.rc.done .rt,.rc.done small{color:#5c5240;opacity:1}
+.rc.done .mid svg{stroke:#5c5240}.rc.done .mid i,.rc.done .tear{border-color:rgba(42,36,24,.25)}
+.dayh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:2px 2px 4px}
+.dayh b{font-size:1.05rem}.dayh span{color:var(--mute);font-size:.85rem}
+.dayl{list-style:none;margin:0 0 6px;padding:0}
+.gap{display:flex;align-items:center;gap:10px;min-height:30px;margin:-6px 0 0 22px;font-size:.84rem;color:var(--mute)}
+.gap::before{content:"";align-self:stretch;border-left:2px dashed var(--line)}
+.gap.bad{color:#b42318;font-weight:600}
+.tkh2{margin:22px 2px 8px;font-size:.9rem;font-weight:600;color:var(--mute)}
+/* ID cards, option A: card wallet */
+.stack{position:relative;margin:4px 0 0}
+.idcard{all:unset;box-sizing:border-box;cursor:pointer;position:absolute;left:0;right:0;height:236px;border-radius:18px;overflow:hidden;background:#fff;box-shadow:0 -2px 0 rgba(42,36,24,.08);display:flex;flex-direction:column}
+.idcard .strip{display:flex;justify-content:space-between;align-items:center;gap:10px;height:56px;flex:none;padding:0 16px;background:var(--k);color:#fff}
+.idcard .strip b{font-size:1.05rem}.idcard .strip span{font-size:.82rem;opacity:.9;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.idcard img{flex:1;min-height:0;width:100%;object-fit:cover;background:#eef2f6;display:block}
+.idcard:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.addid{display:flex;align-items:center;gap:14px;margin-top:16px;padding:16px;border:1.5px dashed var(--or);border-radius:18px;cursor:pointer}
+.addid.over{background:#fdf1e4}
+.addid input{display:none}
+.addid svg{flex:none;width:28px;height:28px;stroke:var(--or);fill:none;stroke-width:2;stroke-linecap:round}
+.addid b{display:block}.addid span span{font-size:.9rem;color:var(--mute)}
+.addid:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.chips2{display:flex;flex-wrap:wrap;gap:8px}
+.chips2 button{all:unset;box-sizing:border-box;cursor:pointer;min-height:40px;padding:6px 14px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--line);font-weight:600;display:inline-flex;align-items:center}
+.chips2 button.on{background:var(--ink);color:#fff;box-shadow:none}
+.chips2 button:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+.sheet label.sl{color:var(--mute);font-size:.9rem;margin-bottom:-6px}
+.sheet input[type=text]{font:inherit;font-size:16px;font-weight:600;padding:12px;border:1.5px solid var(--line);border-radius:10px;background:#fff;color:var(--ink);width:100%;box-sizing:border-box}
+.sheet input[type=text]:focus{outline:0;border-color:var(--or)}
+.offbar{display:flex;align-items:flex-start;gap:10px;background:#fff;border-radius:12px;padding:10px 14px;margin:0 0 12px;font-size:.88rem;line-height:1.4}
+.offbar svg{flex:none;width:20px;height:20px;margin-top:1px;stroke:var(--or);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.warn{background:#fdf1e4;color:#712b13;border-radius:12px;padding:12px 14px;line-height:1.45;font-size:.92rem}
+.acts2{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+.log{font-size:.82rem;color:var(--mute);line-height:1.45;max-height:220px;overflow:auto;margin:8px 0}
+.log div{padding:6px 0;border-top:1px dashed var(--line)}
 @media(prefers-reduced-motion:reduce){.screen.on{animation:none}}
 </style>
 </head>
@@ -190,7 +263,9 @@ main{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
     <div><div class="hi">Welcome aboard</div><h1 id="greet">Bon Voyage</h1></div>
     <button class="avatar" id="avatar" aria-label="Open settings">?</button>
   </header>
+  <div class="offbar" id="offbar" role="status" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 2l20 20M8.5 16.5a5 5 0 0 1 7 0M5 13a10 10 0 0 1 5.2-2.8M19 13a10 10 0 0 0-2-1.5M2 8.8a15 15 0 0 1 4.2-2.6M22 8.8A15 15 0 0 0 11 5"/><circle cx="12" cy="20" r="1"/></svg><span></span></div>
   <div id="next"></div>
+  <div class="dzh"><span>Add a ticket</span><button class="idpill"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.5-2 2-3 3-3s2.5 1 3 3M14 10h4M14 14h4"/></svg><span>Save ID proof</span></button></div>
   <label class="dz" id="hdrop" tabindex="0">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V5M7 10l5-5 5 5M5 20h14"/></svg>
     <span>Drag or upload a ticket</span>
@@ -210,7 +285,7 @@ main{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 </section>
 
 <section id="s2" class="screen">
-  <button class="back" id="back">&larr; Home</button>
+  <div class="topbar"><button class="back" id="back">&larr; Home</button><button class="idpill"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.5-2 2-3 3-3s2.5 1 3 3M14 10h4M14 14h4"/></svg><span>Save ID proof</span></button></div>
   <h1 id="t2"></h1>
   <p class="sub" id="s2sub"></p>
   <label class="drop" id="drop" tabindex="0">
@@ -224,28 +299,26 @@ main{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 
 <section id="s3" class="screen">
   <h1>ID cards</h1>
-  <p class="sub">Keep copies of your ID proofs ready for the ticket check. They are saved only in this browser on this device and are never uploaded.</p>
-  <div class="idform"><label for="idtype">ID type</label>
-    <select id="idtype"><option>Aadhaar</option><option>Driving licence</option><option>Voter ID</option><option>Passport</option><option>PAN card</option><option>Other</option></select></div>
-  <div class="idform"><label for="idlabel">Label</label>
-    <input id="idlabel" type="text" maxlength="40" placeholder="Optional, like Hari Aadhaar"></div>
-  <label class="drop" id="iddrop" tabindex="0">
-    <b>Add ID cards</b><span>Photos, screenshots or PDFs (first page is saved). Choose several at once, or drag them here.</span>
+  <p class="sub">Tap a card to show it full screen at the ticket check.</p>
+  <div id="wallet"></div>
+  <label class="addid" id="iddrop" tabindex="0">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+    <span><b>Add an ID</b><span>Photo, screenshot or PDF. You pick the type after.</span></span>
     <input type="file" id="idfile" multiple accept="image/*,application/pdf">
   </label>
   <div class="status" id="idst" hidden>Saving…</div>
   <div class="err" id="iderr" hidden></div>
-  <h2 class="tkh">Saved IDs <small id="idn"></small></h2>
-  <p class="note" id="idempty">Nothing saved yet. Add your first ID proof above.</p>
-  <div id="idlist"></div>
-  <p class="note">Anyone who can open this browser on this device can see saved IDs, and clearing browser data removes them. Delete a copy when you no longer need it here. A saved copy is a backup: a TTE may still ask for the original or a DigiLocker copy.</p>
+  <p class="note">Saved only on this phone, and clearing browser data removes them. Anyone who can open this phone can see them. Carry the original too: a TTE may ask for it.</p>
 </section>
 
 <section id="s4" class="screen">
   <div id="tklist">
-    <h1>Saved tickets</h1>
-    <p class="sub">Saved on this device only. Onward and return journeys are kept apart so the right one is a tap away.</p>
-    <div id="tkitems"></div><div id="remitems"></div>
+    <h1>Tickets</h1>
+    <div class="dirsw" role="radiogroup" aria-label="Journey">
+      <button role="radio" data-dir="Onward">Onward <span id="nOn"></span></button>
+      <button role="radio" data-dir="Return">Return <span id="nRe"></span></button>
+    </div>
+    <div id="tkitems"></div>
   </div>
   <div id="tkview"></div>
 </section>
@@ -259,8 +332,16 @@ main{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
   <div class="set" id="instsec" hidden><h2>Install Wallet</h2><div id="inst2"></div></div>
   <div class="set"><h2>Share menu</h2>
     <details id="chk"><summary>Why is this app not in my Share menu?</summary><div id="chkout" class="note"></div></details></div>
+  <div class="set"><h2>Offline use</h2>
+    <p class="note" style="margin:0" id="offst" role="status"></p>
+    <div class="acts2" style="margin-bottom:0"><button class="btn sm" id="offgo" hidden>Set up now</button></div></div>
+  <div class="set"><h2>Reading problems</h2>
+    <p class="note" style="margin:0" id="lognote"></p>
+    <div class="log" id="loglist" hidden></div>
+    <div class="acts2" id="logacts" hidden><button class="btn sm" id="logcopy">Copy problem log</button><button class="btn sm ghost" id="logclear">Clear</button></div>
+    <div class="note" id="logmsg" role="status" style="margin:0"></div></div>
   <div class="set"><h2>Reset</h2>
-    <p class="note" style="margin:0 0 10px">Removes saved tickets, ID proofs, reminders and your name from this device, so the app starts fresh.</p>
+    <p class="note" style="margin:0 0 10px">Removes saved tickets, ID proofs and your name from this device, so the app starts fresh.</p>
     <button class="btn dangerline" id="reset">Reset and delete all data</button></div>
 </section>
 </main>
@@ -275,7 +356,7 @@ main{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 
 <div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="Identity proof">
   <img id="vimg" alt="">
-  <div class="vbar"><button class="btn light" id="vprev">Previous</button><span id="vlabel"></span><button class="btn light" id="vnext">Next</button><button class="btn light" id="vclose">Close</button></div>
+  <div class="vbar"><button class="btn light" id="vprev">Previous</button><span id="vlabel"></span><button class="btn light" id="vnext">Next</button><button class="btn light" id="vdel" hidden>Delete</button><button class="btn light" id="vclose">Close</button></div>
 </div>
 
 <div class="modal" id="modal" role="dialog" aria-modal="true"><div class="sheet" id="sheet"></div></div>
@@ -284,6 +365,12 @@ main{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.1.1/tesseract.min.js"></script>
 <script>
 const $=id=>document.getElementById(id);
+/* Reader files. sw.js keeps the same list so they work offline. */
+const SIMD=(()=>{try{return WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,0,0,1,5,1,96,0,1,123,3,2,1,0,10,10,1,8,0,65,0,253,15,253,98,11]))}catch(e){return false}})();
+const LIBS={pdf:"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js",pdfw:"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js",
+  tess:"https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.1.1/tesseract.min.js",tw:"https://cdn.jsdelivr.net/npm/tesseract.js@v5.1.1/dist/worker.min.js",
+  core:"https://cdn.jsdelivr.net/npm/tesseract.js-core@v5.1.1/"+(SIMD?"tesseract-core-simd-lstm.wasm.js":"tesseract-core-lstm.wasm.js")};
+const libErr=()=>Object.assign(new Error("the reader is not on this phone yet. Connect to the internet once, or add a photo instead"),{code:"lib"});
 let type="auto",tsel="auto";
 
 function startUpload(file){
@@ -312,25 +399,61 @@ drop.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();fi.click(
 drop.addEventListener("drop",e=>{if(e.dataTransfer.files[0])run(e.dataTransfer.files[0])});
 fi.onchange=()=>{if(fi.files[0])run(fi.files[0]);fi.value=""};
 
-function reset(){$("out").innerHTML="";$("err").hidden=true;$("status").hidden=true}
+function reset(){$("out").innerHTML="";$("err").hidden=true;$("status").hidden=true;$("bar").style.width="0%"}
 function prog(t,p){$("status").hidden=false;$("stxt").textContent=t;if(p!=null)$("bar").style.width=Math.round(p*100)+"%"}
 function fail(m){$("status").hidden=true;$("err").hidden=false;$("err").textContent=m}
 
+/* Progress messages: say what is happening, never "page 1 / page 2" */
+const MSG={open:"Opening your ticket…",warm:"Getting the scanner ready…",first:"First scan on this phone takes a little longer…",
+  scan:["Scanning your ticket…","Reading the small print…","Almost done…"],next:"Checking the next page…",parse:"Picking out PNR, seats and route…"};
+const scanMsg=(p,i)=>i>1&&p<.35?MSG.next:MSG.scan[p<.35?0:p<.75?1:2];
+
+/* Only reject files that are clearly not tickets; the parsers decide the rest */
+const TICKET_HINT=/PNR|KSRTC|IRCTC|Rail|Passenger|Seat|Journey|Boarding|Coach|Berth|Fare|Train|Bus/i;
+const MAX_MB=20;
+let runId=0,busy=0,lastMeta={};
+
+function errMsg(e){
+  const n=e&&e.name||"",m=String((e&&e.message)||e||"");
+  if(n==="PasswordException")return["password","This PDF is password protected. Open it on your phone, take a screenshot of the ticket, and upload the screenshot."];
+  if(n==="InvalidPDFException"||n==="MissingPDFException"||n==="UnexpectedResponseException")return["badpdf","This PDF is damaged or incomplete. Download it again from your IRCTC or KSRTC email or SMS, then upload it."];
+  if(e&&e.code==="lib"||/pdfjsLib|Tesseract is not defined|Failed to fetch|NetworkError|Load failed|importScripts|network/i.test(m))
+    return["offline",navigator.onLine?"The ticket reader could not load. Check your internet connection and try again."
+      :"You're offline, and the ticket reader isn't saved on this phone yet. Connect to the internet and open Wallet once. After that, tickets can be added without internet."];
+  if(/read image|decode|Image|createImageBitmap/i.test(m))return["image","This image could not be opened. Take a screenshot (PNG or JPG) of the ticket and upload that."];
+  if(/memory|allocation|Array buffer/i.test(m))return["memory","The phone ran out of memory while reading. Close other apps, or upload a screenshot of just the ticket."];
+  return["unknown","Something went wrong while reading the ticket. Try again, or upload the original PDF from your IRCTC or KSRTC email."];
+}
+
 async function run(file){
-  reset();
+  const my=++runId,t0=Date.now();
+  if(busy)ocrStop(); /* a new file replaces the one still being read */
+  busy=my;reset();
+  const isPdf=file.type==="application/pdf"||/\.pdf$/i.test(file.name||"");
+  lastMeta={type:file.type||"(none)",kb:Math.round((file.size||0)/1024),pdf:isPdf,pages:0,scanned:false,ms:0};
+  const stop=(code,m,extra)=>{if(my!==runId)return;lastMeta.ms=Date.now()-t0;fail(m);logIssue(code,m,extra)};
   try{
     let text="";
-    if(file.type==="application/pdf"||/\.pdf$/i.test(file.name)) text=await readPdf(file);
-    else if(file.type.startsWith("image/")) text=await ocr(file,"Reading ticket");
-    else return fail("Please upload an image (PNG, JPG) or a PDF.");
+    if(!file.size)return stop("empty","This file is empty. Download the ticket again and upload it.");
+    if(file.size>MAX_MB*1048576)return stop("toobig","This file is larger than "+MAX_MB+" MB. Upload the ticket PDF or a screenshot of just the ticket.");
+    if(isPdf) text=await readPdf(file);
+    else if(/^image\/hei[cf]/i.test(file.type)||/\.hei[cf]$/i.test(file.name||"")) return stop("heic","iPhone HEIC photos can't be read here. Take a screenshot of the ticket and upload that, or change Camera > Formats to Most Compatible.");
+    else if(file.type.startsWith("image/")){lastMeta.scanned=true;text=await ocr(file)}
+    else return stop("filetype","Please upload an image (PNG, JPG) or a PDF.");
+    if(my!==runId)return;
+    prog(MSG.parse,1);lastMeta.ms=Date.now()-t0;
     $("status").hidden=true;
-    if(text.trim().length<20) return fail("Could not read any text. Try a sharper, straight-on screenshot or the original PDF.");
+    if(text.trim().length<20) return stop("notext","Could not read any text. Try a sharper, straight-on screenshot or the original PDF.");
+    if(!TICKET_HINT.test(text)) return stop("notticket","This does not look like a KSRTC bus or IRCTC train ticket. Upload the ticket PDF, or a screenshot of the ticket page.");
     const det=detect(text)||(type==="auto"?"":type);
     if(!det)return askType(text);
     type=det;document.body.className=det;
     $("t2").textContent=det==="bus"?"KSRTC bus ticket":"IRCTC train ticket";
     show(det==="bus"?parseBus(text):parseTrain(text),text);
-  }catch(e){fail("Something went wrong while reading the ticket ("+(e.message||e)+"). Check your internet connection and try again.")}
+  }catch(e){
+    if(my!==runId)return;
+    const [code,m]=errMsg(e);stop(code,m,String((e&&(e.name+": "+e.message))||e).slice(0,160));
+  }finally{if(busy===my)busy=0}
 }
 
 function askType(text){
@@ -338,41 +461,117 @@ function askType(text){
   $("err").insertAdjacentHTML("beforeend",' <button class="btn sm" data-pt="bus">Bus</button> <button class="btn sm" data-pt="train">Train</button>');
   $("err").querySelectorAll("[data-pt]").forEach(b=>b.onclick=()=>{type=b.dataset.pt;document.body.className=type;$("err").hidden=true;show(type==="bus"?parseBus(text):parseTrain(text),text)});
 }
-async function ocr(src,label){
-  const r=await Tesseract.recognize(src,type==="bus"?"eng+kan":"eng",{logger:m=>{if(m.status==="recognizing text")prog(label+"…",m.progress);else prog("Loading reader…")}});
-  return r.data.text;
+/* OCR: one warm worker per language, reused between scans.
+   Same engine and settings as Tesseract.recognize(), which built and threw away a worker on every call. */
+const ocrW={};let ocrIdle=null,ocrStep=null,warmMsg=MSG.warm,tessP=null;
+async function libURL(u){
+  const r=await fetch(u,{mode:"cors",credentials:"omit"}).catch(()=>null);
+  if(!r||!r.ok)throw libErr();
+  return URL.createObjectURL(await r.blob());
+}
+/* The scanner's own worker and engine, loaded by this page so the service worker can keep them for offline use */
+function tessFiles(){
+  if(!tessP)tessP=Promise.all([libURL(LIBS.tw),libURL(LIBS.core)]).then(([w,c])=>({workerPath:w,corePath:c+"#core.js"})).catch(e=>{tessP=null;throw e});
+  return tessP;
+}
+const langsHave=()=>{try{return JSON.parse(localStorage.getItem("ta-ocr")||"[]")}catch(e){return[]}};
+function langsMark(lang){try{const a=new Set(langsHave());lang.split("+").forEach(l=>a.add(l));localStorage.setItem("ta-ocr",JSON.stringify([...a]))}catch(e){}}
+/* Tesseract 5 never settles createWorker() when a language file fails to load (it swallows the error),
+   so catch the failure ourselves, add a time limit, and shut down the half-started background worker. */
+let kanBad=false;
+async function makeOcrWorker(lang,logger){
+  if(typeof Tesseract==="undefined")throw libErr();
+  const paths=await tessFiles();
+  return new Promise((res,rej)=>{
+    let done=false,spawned=null,timer=null;
+    const fail=m=>{if(done)return;done=true;clearTimeout(timer);try{spawned&&spawned.terminate()}catch(e){}
+      if(/kan/.test(lang))kanBad=true;rej(Object.assign(new Error("Scanner could not start: "+m),{code:navigator.onLine?"":"lib"}))};
+    const W=window.Worker;
+    window.Worker=function(...a){spawned=new W(...a);return spawned}; /* createWorker spawns its worker synchronously */
+    let p;
+    try{p=Tesseract.createWorker(lang,1,{logger,errorHandler:e=>fail(String(e).slice(0,120)),...paths})}
+    catch(e){window.Worker=W;return fail(e.message)}
+    window.Worker=W;
+    timer=setTimeout(()=>fail("timed out"),navigator.onLine?120000:20000);
+    p.then(w=>{if(done){w.terminate();return}done=true;clearTimeout(timer);langsMark(lang);res(w)},e=>fail(String(e)));
+  });
+}
+function ocrWorker(lang){
+  if(!ocrW[lang]){
+    warmMsg=MSG.warm;const slow=setTimeout(()=>{warmMsg=MSG.first;prog(warmMsg)},4000);
+    ocrW[lang]=makeOcrWorker(lang,m=>{if(ocrStep)ocrStep(m)})
+      .then(w=>{clearTimeout(slow);return w},e=>{clearTimeout(slow);delete ocrW[lang];throw e});
+  }
+  return ocrW[lang];
+}
+function ocrStop(){
+  clearTimeout(ocrIdle);const ws=Object.values(ocrW);
+  for(const k in ocrW)delete ocrW[k];
+  ws.forEach(p=>p.then(w=>w.terminate()).catch(()=>{}));
+}
+async function ocr(src,i=1,n=1){
+  if(typeof Tesseract==="undefined")throw libErr();
+  clearTimeout(ocrIdle);
+  ocrStep=m=>{if(m.status==="recognizing text"){const p=m.progress||0;prog(scanMsg(p,i),(i-1+p)/n)}else prog(warmMsg)};
+  prog(warmMsg);
+  const want=type==="bus"&&!kanBad?"eng+kan":"eng";let w;
+  try{w=await ocrWorker(want)}
+  catch(e){if(want==="eng")throw e;w=await ocrWorker("eng")} /* Kannada not available: read the English parts (fails again only if the engine itself is missing) */
+  try{const r=await w.recognize(src);return r.data.text}
+  finally{ocrStep=null;ocrIdle=setTimeout(ocrStop,90000)} /* free the memory after 90 s idle */
 }
 
-let workerReady=false;
-async function loadPdf(file){
-  if(!workerReady){
-    const wsrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
-    const blob=await (await fetch(wsrc)).blob();
-    pdfjsLib.GlobalWorkerOptions.workerSrc=URL.createObjectURL(blob);
-    workerReady=true;
-  }
-  return pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;
+/* pdf.js: one shared worker, started in the background when the app opens */
+let pdfW=null;
+function pdfWorker(){
+  if(!pdfW)pdfW=(async()=>{
+    if(typeof pdfjsLib==="undefined")throw libErr();
+    const res=await fetch(LIBS.pdfw).catch(()=>null);if(!res||!res.ok)throw libErr();
+    pdfjsLib.GlobalWorkerOptions.workerSrc=URL.createObjectURL(await res.blob());
+    const w=new pdfjsLib.PDFWorker({name:"wallet"});await w.promise;return w;
+  })().catch(e=>{pdfW=null;throw e});
+  return pdfW;
 }
+async function loadPdf(file){
+  if(typeof pdfjsLib==="undefined")throw libErr();
+  const [worker,data]=await Promise.all([pdfWorker(),file.arrayBuffer()]);
+  return pdfjsLib.getDocument({data,worker}).promise;
+}
+
+/* Text layer of one page, rows rebuilt top to bottom (unchanged logic) */
+async function pageText(pg){
+  const tc=await pg.getTextContent();
+  const its=tc.items.filter(it=>it.str.trim()).map(it=>({x:it.transform[4],y:it.transform[5],s:it.str})).sort((a,b)=>b.y-a.y);
+  const rows=[];
+  its.forEach(it=>{const r=rows[rows.length-1];if(r&&Math.abs(r.y-it.y)<=4)r.it.push(it);else rows.push({y:it.y,it:[it]})});
+  return rows.map(r=>r.it.sort((a,b)=>a.x-b.x).map(o=>o.s).join(" ")).join("\n");
+}
+/* A scanned page 1 that already shows the PNR and seat status does not need pages 2-3 scanned */
+const hasCore=t=>/PNR/i.test(t)&&/\b(?:CNF|RAC|WL|GNWL|RLWL)\b|Seat\s*No/i.test(t);
 
 async function readPdf(file){
-  prog("Opening PDF…",0);
+  prog(MSG.open,.05);
   const pdf=await loadPdf(file);
-  let all="";
-  for(let i=1;i<=Math.min(pdf.numPages,3);i++){
-    const pg=await pdf.getPage(i),tc=await pg.getTextContent();
-    const its=tc.items.filter(it=>it.str.trim()).map(it=>({x:it.transform[4],y:it.transform[5],s:it.str})).sort((a,b)=>b.y-a.y);
-    const rows=[];
-    its.forEach(it=>{const r=rows[rows.length-1];if(r&&Math.abs(r.y-it.y)<=4)r.it.push(it);else rows.push({y:it.y,it:[it]})});
-    let t=rows.map(r=>r.it.sort((a,b)=>a.x-b.x).map(o=>o.s).join(" ")).join("\n");
-    if(t.trim().length<40){
-      const vp=pg.getViewport({scale:2.2}),c=document.createElement("canvas");
-      c.width=vp.width;c.height=vp.height;
-      await pg.render({canvasContext:c.getContext("2d"),viewport:vp}).promise;
-      t=await ocr(c,"Reading page "+i);
+  try{
+    const n=Math.min(pdf.numPages,3);lastMeta.pages=pdf.numPages;
+    const pages=await Promise.all(Array.from({length:n},(_,k)=>pdf.getPage(k+1)));
+    const texts=await Promise.all(pages.map(pageText)); /* all text layers at once */
+    const digital=texts[0].trim().length>=40;
+    let all="";
+    for(let i=0;i<n;i++){
+      let t=texts[i];
+      /* Only scan pages of a scanned PDF. In a digital PDF a page with no text is an ad or a logo. */
+      if(t.trim().length<40&&!digital&&!(i>0&&hasCore(all))){
+        lastMeta.scanned=true;
+        const vp=pages[i].getViewport({scale:2.2}),c=document.createElement("canvas");
+        c.width=vp.width;c.height=vp.height;
+        await pages[i].render({canvasContext:c.getContext("2d"),viewport:vp}).promise;
+        t=await ocr(c,i+1,n);
+      }
+      all+=t+"\n";
     }
-    all+=t+"\n";
-  }
-  return all;
+    return all;
+  }finally{try{pdf.destroy()}catch(e){}}
 }
 
 /* ---------- parsing ---------- */
@@ -580,24 +779,86 @@ function cardHTML(d,ro){
       ${d.pax.map(p=>paxRow(p,d.train,ro)).join("")}
     </div></div>`;
 }
+function missingFields(d){
+  const m=[];if(!d.head[1])m.push("PNR");
+  d.rows.forEach(r=>{if(!r[1])m.push(r[0])});
+  if(d.pax.some(p=>!p.seat))m.push("Seat");
+  if(d.train&&d.pax.some(p=>!p.coach))m.push("Coach");
+  if(d.pax.some(p=>!p.name))m.push("Passenger name");
+  return m;
+}
+let lastRead=null;
 function show(d,raw){
-  const miss=[d.head[1],...d.rows.map(r=>r[1]),...d.pax.map(p=>p.seat),...(d.train?d.pax.map(p=>p.coach):[])].some(v=>!v);
+  const miss=missingFields(d),hasPnr=!!d.head[1];lastRead={d,raw,miss};
+  if(miss.length)logIssue("missing","Not found: "+miss.join(", "),(d.train?"train":"bus")+(lastMeta.scanned?", scanned":", text PDF"));
   const sv=tkAll(),hasO=sv.some(t=>t.dir==="Onward"),hasR=sv.some(t=>t.dir==="Return");
   const def=hasO&&!hasR?"Return":"Onward";
   const seg=x=>`<button role="radio" aria-checked="${x===def}" class="${x===def?"on":""}" data-dir="${x}">${x}</button>`;
-  $("out").innerHTML=cardHTML(d,false)+`
-    <div class="savebox"><div class="sl" id="dirl">Save this ticket as</div>
+  const save=hasPnr?`<div class="savebox"><div class="sl" id="dirl">Save this ticket as</div>
       <div class="seg" role="radiogroup" aria-labelledby="dirl">${seg("Onward")}${seg("Return")}</div>
       <button class="btn" id="tksave">Save ticket</button>
-      <div class="msg" id="tkmsg" role="status"></div>
-    </div>
-    <p class="note">${miss?"Some details were not found. Fill them in from your ticket.":"Check these against your ticket."} Every field can be edited, and the saved copy uses what you see here. The ticket is read in your browser and is not uploaded anywhere.</p>
+      <div class="msg" id="tkmsg" role="status"></div></div>`
+    :`<div class="savebox"><div class="warn">The PNR could not be read, so this ticket can't be saved. Upload the original PDF from your IRCTC or KSRTC email or SMS. It reads more clearly than a photo or screenshot.</div></div>`;
+  const others=miss.filter(x=>x!=="PNR");
+  const note=others.length?`Not found on this ticket: ${esc(others.join(", "))}. ${hasPnr?"These show as “Not found” in the saved copy. ":""}For the clearest reading, upload the original PDF instead of a photo or screenshot.`
+    :"Check these details match your ticket before you travel.";
+  $("out").innerHTML=cardHTML(d,false)+save+`
+    <p class="note">${note} The ticket is read on this phone and is not uploaded anywhere.</p>
     <details><summary>Text read from the ticket</summary><pre>${esc(raw)}</pre></details>
-    ${actBtns("")}<p style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" onclick="document.getElementById('file').click()">Upload another ticket</button>
-    <button class="btn ghost" onclick="${ids.length?"openViewer(0)":"goIds()"}">${ids.length?"Show ID proof":"Save ID proof"}</button></p>`;
-  document.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>document.querySelectorAll(".seg button").forEach(x=>{x.classList.toggle("on",x===b);x.setAttribute("aria-checked",x===b)}));
-  $("tksave").onclick=saveTicket;
+    <div class="acts2"><button class="btn" onclick="document.getElementById('file').click()">Upload another ticket</button>
+    <button class="btn ghost" id="rep">Report a wrong reading</button></div><div class="note" id="repmsg" role="status" style="margin:0"></div>`;
+  $("out").querySelectorAll(".ticket input").forEach(i=>i.readOnly=true);
+  $("rep").onclick=copyReport;
+  if(!hasPnr)return;
+  document.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".seg button").forEach(x=>{x.classList.toggle("on",x===b);x.setAttribute("aria-checked",x===b)});dupHint()});
+  $("tksave").onclick=saveTicket;dupHint();
 }
+/* Same PNR already saved? Say so before the user saves a second copy */
+function dupHint(){
+  const el=$("tkmsg"),pnr=$("h")&&$("h").value.trim();if(!el||!pnr)return;
+  const dir=document.querySelector(".seg button.on").dataset.dir,kind=type==="train"?"train":"bus";
+  const same=tkAll().filter(t=>t.d.head[1]===pnr&&t.kind===kind);
+  el.textContent=same.some(t=>t.dir===dir)?"Already saved as "+dir+". Saving again replaces that copy."
+    :same.length?"This PNR is already saved as "+same[0].dir+". Saving it as "+dir+" keeps a second copy.":"";
+}
+
+/* ---------- reading problems: a small log kept on this device, to find and fix parser gaps ---------- */
+const APPV="wallet-v4";
+const logAll=()=>{try{return JSON.parse(localStorage.getItem("ta-log")||"[]")}catch(e){return[]}};
+function logIssue(code,msg,extra){
+  try{const a=logAll();a.push({at:Date.now(),code,msg:String(msg).slice(0,200),extra:extra||"",file:lastMeta});localStorage.setItem("ta-log",JSON.stringify(a.slice(-30)))}catch(e){}
+  renderLog();
+}
+function renderLog(){
+  const a=logAll(),el=$("loglist");if(!el)return;
+  $("lognote").textContent=a.length?a.length+" recorded on this phone. Copy the log and send it to the Wallet team so these tickets can be read correctly. It contains no ticket details.":"No reading problems recorded.";
+  el.hidden=$("logacts").hidden=!a.length;
+  el.innerHTML=a.slice().reverse().map(x=>`<div><b>${esc(new Date(x.at).toLocaleString("en-IN",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}))}</b> ${esc(x.msg)}</div>`).join("");
+}
+async function copyText(t){
+  try{await navigator.clipboard.writeText(t);return true}catch(e){}
+  try{const a=document.createElement("textarea");a.value=t;a.style.position="fixed";a.style.opacity="0";document.body.appendChild(a);a.select();const ok=document.execCommand("copy");a.remove();return ok}catch(e){return false}
+}
+const envLine=()=>APPV+" · "+navigator.userAgent.replace(/\s*\([^)]*\)\s*/," ").slice(0,90);
+async function copyReport(){
+  if(!lastRead)return;const d=lastRead.d,f=lastMeta;
+  const t=["Wallet reading report",envLine(),"Chosen type: "+tsel+" · read as: "+(d.train?"train":"bus"),
+    "File: "+f.type+", "+f.kb+" KB"+(f.pdf?", "+f.pages+" page(s)":"")+(f.scanned?", scanned":", text layer")+", "+f.ms+" ms",
+    "Not found: "+(lastRead.miss.join(", ")||"nothing"),"","--- Result ---",d.head.join(": "),...d.rows.map(r=>r[0]+": "+r[1]),
+    ...d.pax.map((p,i)=>"Passenger "+(i+1)+": "+[p.name,p.coach,p.seat,p.type].filter(x=>x!=null).join(" | ")),"","--- Text read from the ticket ---",lastRead.raw].join("\n");
+  $("repmsg").textContent=await copyText(t)?"Report copied. Paste it into your message to the Wallet team. It includes your ticket details, so send it only to them.":"Could not copy here. Open “Text read from the ticket” above and copy it from there.";
+}
+$("logcopy").onclick=async()=>{
+  const a=logAll(),t=["Wallet problem log",envLine(),...a.map(x=>new Date(x.at).toISOString()+" ["+x.code+"] "+x.msg+(x.extra?" ("+x.extra+")":"")+" · "+(x.file?x.file.type+" "+x.file.kb+"KB"+(x.file.pdf?" p"+x.file.pages:"")+(x.file.scanned?" scanned":"")+" "+x.file.ms+"ms":""))].join("\n");
+  $("logmsg").textContent=await copyText(t)?"Problem log copied.":"Could not copy on this browser.";
+};
+$("logclear").onclick=()=>{try{localStorage.removeItem("ta-log")}catch(e){}renderLog();$("logmsg").textContent="Cleared."};
+
+/* ---------- ID proof shortcut (top right of the ticket area) ---------- */
+const ID_SVG='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.5-2 2-3 3-3s2.5 1 3 3M14 10h4M14 14h4"/></svg>';
+const idPill=()=>`<button class="idpill${ids.length?" has":""}">${ID_SVG}<span>${ids.length?"Show ID proof":"Save ID proof"}</span></button>`;
+function paintIdPills(){document.querySelectorAll(".idpill").forEach(b=>{b.classList.toggle("has",ids.length>0);b.querySelector("span").textContent=ids.length?"Show ID proof":"Save ID proof"})}
+document.addEventListener("click",e=>{const b=e.target.closest(".idpill");if(!b)return;tap();ids.length?openViewer(0):goIds()});
 
 /* ---------- identity proof (kept only in this browser, via IndexedDB) ---------- */
 let ids=[],urls=[],mem=[],idPersist=true,vi=0,delTimer=null;
@@ -648,16 +909,19 @@ async function toJpeg(file){
   return blobOf(c);
 }
 
+const ID_TYPES=["Aadhaar","Driving licence","Voter ID","Passport","PAN card","Other"];
+const ID_COLOR={"Aadhaar":"#0f766e","Driving licence":"#2a2418","Voter ID":"#3730a3","Passport":"#1f4e79","PAN card":"#b4560f","Other":"#5c5240"};
 function renderIds(){
-  urls.forEach(u=>URL.revokeObjectURL(u));urls=[];
-  $("idlist").innerHTML=ids.map((r,i)=>{
-    const u=URL.createObjectURL(r.blob);urls.push(u);
+  urls.forEach(u=>URL.revokeObjectURL(u));urls=ids.map(r=>URL.createObjectURL(r.blob));
+  const n=ids.length,STEP=64,H=236;
+  $("wallet").innerHTML=n?`<div class="stack" style="height:${(n-1)*STEP+H}px">`+ids.map((r,i)=>{
     const d=new Date(r.added).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"});
-    return `<div class="idc"><img src="${u}" alt="${esc(r.type)} preview"><div class="m"><b>${esc(r.label||r.type)}</b><small>${r.label?esc(r.type)+" · ":""}Saved ${d}</small></div>
-      <button class="btn sm" data-v="${i}">View</button><button class="btn sm ghost" data-d="${i}">Delete</button></div>`;
-  }).join("");
-  $("idempty").hidden=ids.length>0;
-  $("nI").textContent=ids.length;$("lI").textContent=ids.length===1?"ID card":"ID cards";$("idn").textContent=ids.length?ids.length+" saved":"";
+    return `<button class="idcard" data-v="${i}" style="top:${i*STEP}px;--k:${ID_COLOR[r.type]||ID_COLOR.Other}" aria-label="Show ${esc(r.label||r.type)}">
+      <span class="strip"><b>${esc(r.type)}</b><span>${esc(r.label||"Saved "+d)}</span></span>${i===n-1?`<img src="${urls[i]}" alt="">`:""}</button>`;
+  }).join("")+`</div>`
+  :`<div class="empty"><b>No ID cards yet</b>Add Aadhaar, a driving licence or another photo ID to show at the ticket check.</div>`;
+  $("nI").textContent=n;$("lI").textContent=n===1?"ID card":"ID cards";
+  paintIdPills();
 }
 async function refreshIds(){ids=await idAll();renderIds()}
 
@@ -681,32 +945,50 @@ async function addId(files){
 
 function goIds(){nav("ids")}
 
+/* Pick the files first, then say which ID it is (the sheet holds the fields addId() reads) */
+function askIdType(files){
+  if(!files.length)return;
+  const have=new Set(ids.map(r=>r.type)),def=ID_TYPES.find(t=>!have.has(t))||"Other";
+  modal(`<h2>Which ID is this?</h2>
+    <div class="chips2" role="radiogroup" aria-label="ID type">${ID_TYPES.map(t=>`<button role="radio" aria-checked="${t===def}" class="${t===def?"on":""}" data-t="${esc(t)}">${esc(t)}</button>`).join("")}</div>
+    <input type="hidden" id="idtype" value="${esc(def)}">
+    <label class="sl" for="idlabel">Label (optional)</label>
+    <input id="idlabel" type="text" maxlength="40" placeholder="Like Priya Aadhaar">
+    <button class="btn" id="idgo">${files.length>1?"Save "+files.length+" files":"Save ID"}</button>
+    <button class="btn ghost" data-close>Cancel</button>`);
+  $("sheet").querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{
+    $("idtype").value=b.dataset.t;
+    $("sheet").querySelectorAll("[data-t]").forEach(x=>{x.classList.toggle("on",x===b);x.setAttribute("aria-checked",x===b)});
+  });
+  $("idgo").onclick=async()=>{const g=$("idgo");if(g.dataset.busy)return;g.dataset.busy=1;g.textContent="Saving…";await addId(files);closeModal()};
+}
 const idd=$("iddrop"),idf=$("idfile");
 idd.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();idf.click()}};
 ["dragover","dragenter"].forEach(ev=>idd.addEventListener(ev,e=>{e.preventDefault();idd.classList.add("over")}));
 ["dragleave","drop"].forEach(ev=>idd.addEventListener(ev,e=>{e.preventDefault();idd.classList.remove("over")}));
-idd.addEventListener("drop",e=>{if(e.dataTransfer.files.length)addId([...e.dataTransfer.files])});
-idf.onchange=()=>{if(idf.files.length)addId([...idf.files]);idf.value=""};
-
-$("idlist").onclick=async e=>{
-  const b=e.target.closest("button");if(!b)return;
-  if(b.dataset.v!=null)return openViewer(+b.dataset.v);
-  if(b.dataset.d!=null){
-    if(b.dataset.armed){clearTimeout(delTimer);await idDel(ids[+b.dataset.d].id);return refreshIds()}
-    b.dataset.armed="1";b.textContent="Tap again to delete";
-    delTimer=setTimeout(()=>{b.textContent="Delete";delete b.dataset.armed},3000);
-  }
-};
+idd.addEventListener("drop",e=>{if(e.dataTransfer.files.length)askIdType([...e.dataTransfer.files])});
+idf.onchange=()=>{const f=[...idf.files];idf.value="";askIdType(f)};
+$("wallet").onclick=e=>{const b=e.target.closest("[data-v]");if(b){tap();openViewer(+b.dataset.v,true)}};
 
 function drawViewer(){
   const r=ids[vi];$("vimg").src=urls[vi];$("vimg").alt=r.type+" identity proof";
   $("vlabel").textContent=r.type+(ids.length>1?" ("+(vi+1)+" of "+ids.length+")":"");
   $("vprev").hidden=$("vnext").hidden=ids.length<2;
 }
-function openViewer(i){
+/* manage: opened from the ID cards screen, so Delete is offered (not when showing ID at the ticket check) */
+function openViewer(i,manage){
   if(!ids.length)return;
-  vi=i;drawViewer();$("viewer").classList.add("on");$("vclose").focus();
+  vi=i;drawViewer();const d=$("vdel");d.hidden=!manage;d.textContent="Delete";delete d.dataset.armed;
+  $("viewer").classList.add("on");$("vclose").focus();
 }
+$("vdel").onclick=async()=>{
+  const b=$("vdel");
+  if(!b.dataset.armed){b.dataset.armed="1";b.textContent="Tap again to delete";delTimer=setTimeout(()=>{b.textContent="Delete";delete b.dataset.armed},3000);return}
+  clearTimeout(delTimer);delete b.dataset.armed;b.textContent="Delete";
+  await idDel(ids[vi].id);await refreshIds();
+  if(!ids.length)return closeViewer();
+  vi=Math.min(vi,ids.length-1);drawViewer();
+};
 const closeViewer=()=>$("viewer").classList.remove("on");
 $("vclose").onclick=closeViewer;
 $("vprev").onclick=()=>{vi=(vi-1+ids.length)%ids.length;drawViewer()};
@@ -750,45 +1032,65 @@ function saveTicket(){
   $("tkmsg").innerHTML=(i>=0?"Updated the saved ":"Saved as ")+esc(dir)+" ticket."+(tkPersist?"":" This browser would not let me store it, so it is kept only until you close this page.")+" <button class=\"btn sm ghost\" onclick=\"openTickets()\">View my tickets</button>";
 }
 const rv=(d,l)=>((d.rows.find(r=>r[0]===l)||["",""])[1]||"");
-function tkCard(t){
-  const d=t.d,tr=t.kind==="train";
-  const route=[rv(d,"From"),rv(d,"To")].filter(Boolean).join(" → ")||"Route not found";
-  const when=tr?rv(d,"Departure"):[rv(d,"Date of journey"),rv(d,"Departure time")].filter(Boolean).join(" · ");
-  const seats=d.pax.map(p=>[p.name,tr?[p.coach,p.seat].filter(Boolean).join("/"):p.seat].filter(Boolean).join(" · ")).filter(Boolean).join("; ");
-  return `<div class="tk ${t.kind}"><div class="t1">${tr?"Train"+(rv(d,"Train")?" · "+esc(rv(d,"Train")):""):"Bus"}</div>
-    <div class="t2">PNR ${esc(d.head[1]||"not found")} · ${esc(route)}</div>
-    <div class="t3">${esc([when,seats].filter(Boolean).join(" · "))}</div>
-    <div class="acts"><button class="btn sm" data-o="${t.id}">View</button><button class="btn sm ghost" data-x="${t.id}">Delete</button></div></div>`;
+/* "MGR CHENNAI CTL" -> "MGR Chennai CTL": keep short consonant-only codes in capitals */
+const smart=s=>clean(s).toLowerCase().replace(/[a-z0-9]+/g,w=>/^[b-df-hj-np-tv-z]{2,4}$/.test(w)?w.toUpperCase():w[0].toUpperCase()+w.slice(1));
+const fitName=n=>{const L=Math.max(0,...(n||"").split(/\s+/).map(w=>w.length));return L<=9?"":` style="font-size:${L<=11?1.15:L<=14?1:.9}rem"`};
+const stn=s=>{const m=(s||"").match(/^(.*?)\s*\(([A-Z]{2,5})\)\s*$/);return m?{name:smart(m[1]),code:m[2]}:{name:smart(s||""),code:""}};
+function passHTML(t,j,past){
+  const d=t.d,tr=t.kind==="train",p=d.pax[0]||{},f=stn(rv(d,"From")),to=stn(rv(d,"To"));
+  const dep=(tr?rv(d,"Departure"):rv(d,"Departure time")).split(" · ")[0],arr=tr?rv(d,"Arrival").split(" · ")[0]:"";
+  const day=j?new Date(j).toLocaleDateString("en-IN",{weekday:"short",day:"numeric",month:"short"}):((tr?rv(d,"Departure").split(" · ")[1]:rv(d,"Date of journey"))||"Date not found");
+  const tn=rv(d,"Train").split(" · "),what=tr?"Train "+[tn[0],tn[1]&&smart(tn[1])].filter(Boolean).join(" "):"KSRTC bus";
+  const sub=(c,tm)=>[c,tm].filter(Boolean).join(", ");
+  const more=d.pax.length-1,foot=tr?[p.coach&&"Coach <b>"+esc(p.coach)+"</b>",p.seat&&"Seat <b>"+esc(p.seat)+"</b>"]:[p.seat&&"Seat <b>"+esc(p.seat)+"</b>"];
+  if(more>0)foot.push("+"+more+" passenger"+(more>1?"s":""));
+  return `<button class="rc ${t.kind} pass${past?" past":""}" data-o="${t.id}" aria-label="Open ${tr?"train":"bus"} ticket, ${esc(f.name||"origin")} to ${esc(to.name||"destination")}, ${esc(day)}">
+    <div class="rt2"><span>${esc(day)}</span><span>${esc(what)}</span></div>
+    <div class="rr"><div class="st"><b${fitName(f.name)}>${esc(f.name||"From?")}</b><small>${esc(sub(f.code,dep))}</small></div>
+      <div class="mid"><svg viewBox="0 0 48 48" aria-hidden="true">${ICON[t.kind]}</svg><i></i></div>
+      <div class="st r"><b${fitName(to.name)}>${esc(to.name||"To?")}</b><small>${esc(sub(to.code,past&&!tr&&p.seat?"Seat "+p.seat:arr))}</small></div></div>
+    ${past?"":`<div class="tear"></div><div class="rf">${foot.filter(Boolean).map(x=>"<span>"+x+"</span>").join("")}</div><div class="pnr">PNR ${esc(d.head[1]||"not found")}</div>`}
+  </button>`;
 }
+let tkDir=null;
 function renderTickets(){
-  if(typeof renderRems==="function")renderRems();
-  const all=tkAll(),n=dir=>all.filter(t=>t.dir===dir).length;
+  const all=tkAll(),cnt=dir=>all.filter(t=>t.dir===dir).length;
   $("nT").textContent=all.length;$("lT").textContent=all.length===1?"ticket":"tickets";renderNext(all);
-  $("tkitems").innerHTML=["Onward","Return"].map(dir=>{
-    const l=all.filter(t=>t.dir===dir).sort((a,b)=>b.saved-a.saved);
-    return `<h2 class="tkh">${dir} <small>${l.length?l.length+" saved":""}</small></h2>`+(l.length?l.map(tkCard).join(""):`<p class="note">No ${dir.toLowerCase()} ticket saved.</p>`);
-  }).join("");
+  if(!tkDir)tkDir=cnt("Onward")||!cnt("Return")?"Onward":"Return";
+  $("nOn").textContent=cnt("Onward")||"";$("nRe").textContent=cnt("Return")||"";
+  document.querySelectorAll(".dirsw button").forEach(b=>{const on=b.dataset.dir===tkDir;b.classList.toggle("on",on);b.setAttribute("aria-checked",on)});
+  /* a journey moves to Travelled the day after it, so on the day it stays on top */
+  const today=new Date();today.setHours(0,0,0,0);
+  const list=all.filter(t=>t.dir===tkDir).map(t=>({t,j:journeyTime(t.d)}));
+  const up=list.filter(x=>!x.j||x.j>=+today).sort((a,b)=>(a.j||Infinity)-(b.j||Infinity)||b.t.saved-a.t.saved);
+  const past=list.filter(x=>x.j&&x.j<+today).sort((a,b)=>b.j-a.j);
+  $("tkitems").innerHTML=list.length
+    ?up.map(x=>passHTML(x.t,x.j,false)).join("")+(past.length?'<h2 class="tkh2">Travelled</h2>'+past.map(x=>passHTML(x.t,x.j,true)).join(""):"")+'<p class="note">Tap a pass to open it. Delete is inside the open ticket.</p>'
+    :`<div class="empty"><b>No ${tkDir.toLowerCase()} tickets</b>Upload a ticket and save it as ${tkDir}.<br><button class="btn sm" data-up style="margin-top:12px">Upload a ticket</button></div>`;
 }
+document.querySelectorAll(".dirsw button").forEach(b=>b.onclick=()=>{tap();tkDir=b.dataset.dir;renderTickets()});
 function openTickets(pop){
   renderTickets();$("tkview").innerHTML="";$("tklist").hidden=false;nav("tickets",pop!==true);
 }
 function openTicket(id,pop){
   const t=tkAll().find(x=>x.id===id);if(!t)return;
   $("tklist").hidden=true;nav("tickets",false);document.body.className=t.kind;if(pop!==true){try{history.pushState({v:"tickets",d:id},"")}catch(e){}}
-  $("tkview").innerHTML=`<button class="back" id="tkvback">&larr; All tickets</button>
-    <h1>${esc(t.dir)} journey</h1><p class="sub">${t.kind==="train"?"Train":"Bus"} ticket saved on this device.</p>`+cardHTML(t.d,true)+actBtns(t.id)+
-    `<p><button class="btn ghost" onclick="${ids.length?"openViewer(0)":"goIds()"}">${ids.length?"Show ID proof":"Save ID proof"}</button></p>`;
-  $("tkvback").onclick=()=>{if(history.state&&history.state.d)history.back();else openTickets()};
+  $("tkview").innerHTML=`<div class="topbar"><button class="back" id="tkvback">&larr; All tickets</button>${idPill()}</div>
+    <h1>${esc(t.dir)} journey</h1><p class="sub">${t.kind==="train"?"Train":"Bus"} ticket saved on this device.</p>`+cardHTML(t.d,true)+
+    `<div class="acts2"><button class="btn dangerline" id="tkdel">Delete this ticket</button></div>`;
+  const leave=()=>{if(history.state&&history.state.d)history.back();else openTickets()};
+  $("tkvback").onclick=leave;
+  $("tkdel").onclick=()=>{
+    const b=$("tkdel");
+    if(!b.dataset.armed){b.dataset.armed="1";b.textContent="Tap again to delete";tkTimer=setTimeout(()=>{b.textContent="Delete this ticket";delete b.dataset.armed},3000);return}
+    clearTimeout(tkTimer);tkStore(tkAll().filter(x=>x.id!==id));renderTickets();leave();
+  };
   window.scrollTo(0,0);
 }
 $("tkitems").onclick=e=>{
   const b=e.target.closest("button");if(!b)return;
-  if(b.dataset.o)return openTicket(b.dataset.o);
-  if(b.dataset.x){
-    if(b.dataset.armed){clearTimeout(tkTimer);tkStore(tkAll().filter(t=>t.id!==b.dataset.x));remStore(remAll().filter(r=>r.tid!==b.dataset.x));return renderTickets()}
-    b.dataset.armed="1";b.textContent="Tap again to delete";
-    tkTimer=setTimeout(()=>{b.textContent="Delete";delete b.dataset.armed},3000);
-  }
+  if(b.dataset.o){tap();return openTicket(b.dataset.o)}
+  if(b.dataset.up!=null)$("hfile").click();
 };
 /* ---------- shared-in files (Android share sheet -> service worker -> here) ---------- */
 async function intakeShared(){
@@ -804,11 +1106,8 @@ async function intakeShared(){
     run(new File([blob],name,{type:blob.type||rs.headers.get("content-type")||""}));
   }catch(e){}
 }
-/* ---------- journey time, reminders, alarms ---------- */
+/* ---------- journey time (used to pick the next trip on Home) ---------- */
 const MONI={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
-const pad=n=>String(n).padStart(2,"0");
-const loc=ms=>{const d=new Date(ms);return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"T"+pad(d.getHours())+":"+pad(d.getMinutes())};
-const fmt=ms=>new Date(ms).toLocaleString("en-IN",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
 function journeyTime(d){
   const txt=d.train?rv(d,"Departure"):rv(d,"Date of journey")+" "+rv(d,"Departure time");
   const tm=txt.match(/(\d{1,2})\s*:\s*(\d{2})/),dm=txt.match(/(\d{1,2})[\s\-\/.]+([A-Za-z]{3,9}|\d{1,2})[\s\-\/.,]+(\d{2,4})/);
@@ -816,101 +1115,14 @@ function journeyTime(d){
   const mo=/\d/.test(dm[2])?+dm[2]-1:MONI[dm[2].slice(0,3).toLowerCase()];let y=+dm[3];if(y<100)y+=2000;
   return mo==null||isNaN(mo)?null:new Date(y,mo,+dm[1],+tm[1],+tm[2]).getTime();
 }
-const lab=d=>[d.train?"Train":"Bus",d.train?(rv(d,"Train").split(" · ")[0]||""):"",[rv(d,"From"),rv(d,"To")].filter(Boolean).join(" to ")].filter(Boolean).join(" ");
-let remMem=[],remTimer=null;
-const remAll=()=>{try{return JSON.parse(localStorage.getItem("ta-rem")||"[]")}catch(e){return remMem.slice()}};
-const remStore=a=>{remMem=a.slice();try{localStorage.setItem("ta-rem",JSON.stringify(a))}catch(e){}};
-const rid=()=>Date.now()+"-"+Math.random().toString(36).slice(2,6);
-const actBtns=tid=>`<div class="savebox"><div class="sl">Before you travel</div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" data-a="remind" data-tid="${tid}">Tap to Remind</button><button class="btn ghost" data-a="alarm" data-tid="${tid}">Set an alarm</button></div></div>`;
 const modal=h=>{$("sheet").innerHTML=h;$("modal").classList.add("on")};
 const closeModal=()=>$("modal").classList.remove("on");
 $("modal").onclick=e=>{if(e.target.id==="modal"||(e.target.closest&&e.target.closest("[data-close]")))closeModal()};
-document.addEventListener("click",e=>{const b=e.target.closest("[data-a]");if(b)openAct(b.dataset.a,b.dataset.tid||"")});
-
-function icsFile(label,startMs,trig){
-  const f=ms=>{const d=new Date(ms);return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+"T"+pad(d.getHours())+pad(d.getMinutes())+"00"};
-  const s=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//Wallet//EN","BEGIN:VEVENT","UID:"+rid()+"@wallet","DTSTAMP:"+new Date().toISOString().replace(/[-:]|\.\d+/g,""),"DTSTART:"+f(startMs),"DTEND:"+f(startMs+36e5),"SUMMARY:"+label.replace(/[,;]/g," "),"BEGIN:VALARM","ACTION:DISPLAY","DESCRIPTION:"+label.replace(/[,;]/g," "),"TRIGGER:"+trig,"END:VALARM","END:VEVENT","END:VCALENDAR"].join("\r\n");
-  return new File([s],"journey.ics",{type:"text/calendar"});
+/* Reminders and alarms were removed. Clear what older versions stored. */
+function dropOldReminders(){
+  try{if(localStorage.getItem("ta-rem")===null)return;localStorage.removeItem("ta-rem")}catch(e){return}
+  try{navigator.serviceWorker.getRegistration().then(r=>r&&r.getNotifications({includeTriggered:true})).then(ns=>(ns||[]).forEach(n=>n.close())).catch(()=>{})}catch(e){}
 }
-async function giveFile(f){
-  try{if(navigator.canShare&&navigator.canShare({files:[f]}))return await navigator.share({files:[f],title:f.name})}catch(e){if(e.name==="AbortError")return}
-  const a=document.createElement("a");a.href=URL.createObjectURL(f);a.download=f.name;document.body.appendChild(a);a.click();a.remove();
-}
-async function notify(r){
-  const t="Journey in about 2 hours",o={body:r.label+" · departs "+fmt(r.j),tag:r.id};
-  try{if(Notification.permission==="granted"){const reg=await navigator.serviceWorker.ready;return reg.showNotification(t,o)}}catch(e){}
-  alert(t+"\n"+o.body);
-}
-async function trySchedule(r){
-  try{
-    if(typeof TimestampTrigger==="undefined"||Notification.permission!=="granted")return;
-    const reg=await navigator.serviceWorker.ready;
-    await reg.showNotification("Journey in about 2 hours",{body:r.label+" · departs "+fmt(r.j),tag:r.id,showTrigger:new TimestampTrigger(r.at)});
-  }catch(e){}
-}
-function checkDue(){
-  const a=remAll();let ch=false;
-  a.forEach(r=>{if(r.kind==="remind"&&!r.fired&&Date.now()>=r.at&&Date.now()<r.j+36e5){r.fired=true;ch=true;notify(r)}});
-  if(ch){remStore(a);renderRems()}
-}
-setInterval(checkDue,30000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkDue()});
-
-function openAct(kind,tid){
-  const d=tid?(tkAll().find(x=>x.id===tid)||{}).d:readCard();if(!d)return;
-  const jt=journeyTime(d),label=lab(d);
-  if(kind==="remind"){
-    modal(`<h2>Remind me before I travel?</h2><p class="note" style="margin:0">One reminder, 2 hours before departure. Check the journey time:</p>
-      <input type="datetime-local" id="jt" value="${jt?loc(jt):""}"><div class="note" id="jtx" style="margin:0"></div>
-      <button class="btn" id="yes">Yes, remind me</button><button class="btn ghost" data-close>No thanks</button><div class="note" id="am" role="status" style="margin:0"></div>`);
-    const upd=()=>{const v=$("jt").value;$("jtx").textContent=v?"Reminder time: "+fmt(new Date(v).getTime()-72e5):"Enter the departure date and time."};
-    $("jt").oninput=upd;upd();
-    $("yes").onclick=async()=>{
-      const v=$("jt").value;if(!v)return;const j=new Date(v).getTime(),at=j-72e5;
-      if(at<=Date.now()){$("am").textContent="Departure is less than 2 hours away, so that reminder time has already passed. Use Set an alarm instead.";return}
-      const r={id:rid(),kind:"remind",tid,label,j,at,fired:false};
-      remStore(remAll().concat(r));renderRems();
-      let perm="denied";try{perm=Notification.permission==="default"?await Notification.requestPermission():Notification.permission}catch(e){}
-      await trySchedule(r);
-      $("am").innerHTML="Reminder saved for "+esc(fmt(at))+". "+(perm==="granted"?"Phones can stop web apps from running in the background, so the notification is only certain if the app is opened or kept alive. For a guaranteed alert, add it to your calendar too. ":"Notifications are blocked for this app, so use the calendar alert. ")+'<button class="btn sm" id="ics">Add calendar alert</button>';
-      $("ics").onclick=()=>giveFile(icsFile(label,j,"-PT2H"));
-    };
-  }else{
-    modal(`<h2>Set an alarm</h2><p class="note" style="margin:0">One-time alarm. Choose when it should ring:</p>
-      <div class="chips">${[1,2,3].map(h=>`<button class="btn sm ghost" data-h="${h}"${jt?"":" disabled"}>${h} h before</button>`).join("")}</div>
-      <input type="datetime-local" id="at" value="${jt?loc(jt-72e5):""}"><div class="note" id="atx" style="margin:0"></div>
-      <button class="btn" id="go">Open Clock and set alarm</button><button class="btn ghost" data-close>Cancel</button><div class="note" id="am" role="status" style="margin:0"></div>`);
-    const upd=()=>{const v=$("at").value,a=new Date(v).getTime();$("atx").textContent=!v?"":a-Date.now()>864e5?"Clock alarms ring at the next "+pad(new Date(a).getHours())+":"+pad(new Date(a).getMinutes())+", so for a journey more than 24 hours away set it closer to the day.":"Alarm: "+fmt(a)};
-    $("at").oninput=upd;upd();
-    document.querySelectorAll("[data-h]").forEach(b=>b.onclick=()=>{$("at").value=loc(jt-b.dataset.h*36e5);upd()});
-    $("go").onclick=()=>{
-      const a=new Date($("at").value).getTime();
-      if(!a||a<=Date.now()){$("am").textContent="Choose a time in the future.";return}
-      const dt=new Date(a),H=dt.getHours(),M=dt.getMinutes(),t=pad(H)+":"+pad(M);
-      remStore(remAll().concat({id:rid(),kind:"alarm",tid,label,j:a,at:a,fired:true}));renderRems();
-      if(/Android/i.test(navigator.userAgent))location.href="intent:#Intent;action=android.intent.action.SET_ALARM;i.android.intent.extra.alarm.HOUR="+H+";i.android.intent.extra.alarm.MINUTES="+M+";S.android.intent.extra.alarm.MESSAGE="+encodeURIComponent(label)+";B.android.intent.extra.alarm.SKIP_UI=false;end";
-      setTimeout(()=>{if(document.visibilityState==="visible"){
-        $("am").innerHTML="This browser cannot open Clock directly. Set an alarm for <b>"+t+"</b> in your Clock app (on iPhone: say \"Hey Siri, set an alarm for "+t+"\"). Or get a calendar alert at that time: "+'<button class="btn sm" id="ics">Add calendar alert</button>';
-        $("ics").onclick=()=>giveFile(icsFile(label+" (alarm)",a,"-PT0M"));
-      }},1800);
-    };
-  }
-}
-let remDel=null;
-function renderRems(){
-  const el=$("remitems");if(!el)return;
-  const a=remAll().sort((x,y)=>x.at-y.at);
-  el.innerHTML=`<h2 class="tkh">Reminders and alarms <small>${a.length?a.length+" set":""}</small></h2>`+(a.length?a.map(r=>`<div class="rem"><div><b>${r.kind==="alarm"?"Alarm":"Reminder"}</b> · ${esc(fmt(r.at))}<small>${esc(r.label)}${r.kind==="alarm"?" · also delete it in your Clock app":""}</small></div><button class="btn sm ghost" data-rd="${r.id}">Delete</button></div>`).join(""):`<p class="note">None set.</p>`);
-}
-document.addEventListener("click",async e=>{
-  const b=e.target.closest("[data-rd]");if(!b)return;
-  if(b.dataset.armed){
-    clearTimeout(remDel);remStore(remAll().filter(r=>r.id!==b.dataset.rd));
-    try{const reg=await navigator.serviceWorker.ready;(await reg.getNotifications({tag:b.dataset.rd})).forEach(n=>n.close())}catch(x){}
-    return renderRems();
-  }
-  b.dataset.armed="1";b.textContent="Tap again to delete";
-  remDel=setTimeout(()=>{b.textContent="Delete";delete b.dataset.armed},3000);
-});
 /* ---------- app shell: tabs, back button, name, home, reset ---------- */
 const VIEWS={home:"s1",upload:"s2",ids:"s3",tickets:"s4",settings:"s5"};
 function nav(v,push,keep){
@@ -972,33 +1184,67 @@ const ICON={
   train:'<rect x="10" y="6" width="28" height="30" rx="6"/><path d="M10 22h28M17 42l5-6M31 42l-5-6"/><circle cx="17" cy="29" r="1.5"/><circle cx="31" cy="29" r="1.5"/>',
   bus:'<rect x="8" y="7" width="32" height="30" rx="5"/><path d="M8 24h32M14 37v4M34 37v4"/><circle cx="16" cy="31" r="1.5"/><circle cx="32" cy="31" r="1.5"/>'
 };
-function renderNext(all){
-  const el=$("next");
-  if(!all.length){el.innerHTML='<div class="empty"><b>No trips yet</b>Drag a ticket below and it will show up here.</div>';return}
-  const now=Date.now(),w=all.map(t=>({t,j:journeyTime(t.d)}));
-  const up=w.filter(x=>x.j&&x.j>=now-36e5).sort((a,b)=>a.j-b.j)[0];
-  const pk=up||{t:all.slice().sort((a,b)=>b.saved-a.saved)[0]};
-  pk.j=pk.j||journeyTime(pk.t.d);
-  const t=pk.t,d=t.d,tr=t.kind==="train",p=d.pax[0]||{};
-  const dep=(tr?rv(d,"Departure"):rv(d,"Departure time")).split(" · ")[0];
-  const arr=tr?rv(d,"Arrival").split(" · ")[0]:"";
-  const dl=pk.j?", "+new Date(pk.j).toLocaleDateString("en-IN",{day:"numeric",month:"short"}).toUpperCase():"";
+/* ---------- Home: every journey on the next travel day, in departure order ---------- */
+const whenMs=txt=>journeyTime({train:true,rows:[["Departure",txt||""]],pax:[]}); /* same date/time reading as journeyTime */
+const hhmm=ms=>{const d=new Date(ms);return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")};
+const dur=ms=>{const m=Math.round(ms/6e4),h=Math.floor(m/60),r=m%60;return h?h+" h"+(r?" "+r+" min":""):r+" min"};
+function homeCard(t,top,done,aria){
+  const d=t.d,tr=t.kind==="train",p=d.pax[0]||{},f=stn(rv(d,"From")),to=stn(rv(d,"To"));
+  const dep=(tr?rv(d,"Departure"):rv(d,"Departure time")).split(" · ")[0],arr=tr?rv(d,"Arrival").split(" · ")[0]:"";
   const parts=tr?[p.coach&&"Coach "+p.coach,p.seat&&"Seat "+p.seat,rv(d,"Train").split(" · ")[0]]:[p.seat&&"Seat "+p.seat,d.head[1]&&"PNR "+d.head[1]];
   if(d.pax.length>1)parts.push("+"+(d.pax.length-1)+" more");
-  const foot=parts.filter(Boolean);
-  el.innerHTML=`<button class="rc ${t.kind}" data-o="${t.id}" aria-label="Open ${tr?"train":"bus"} ticket">
-    <div class="rt">${up?"NEXT TRIP":"LAST SAVED"}${esc(dl)}</div>
-    <div class="rr"><div class="st"><b>${esc(rv(d,"From")||"From?")}</b><small>${esc(dep)}</small></div>
+  const foot=parts.filter(Boolean),sub=(c,tm)=>[c,tm].filter(Boolean).join(", ");
+  return `<button class="rc hc ${t.kind}${done?" done":""}" data-o="${t.id}" aria-label="${esc(aria)}">
+    <div class="rt">${top}</div>
+    <div class="rr"><div class="st"><b${fitName(f.name)}>${esc(f.name||"From?")}</b><small>${esc(sub(f.code,dep))}</small></div>
       <div class="mid"><svg viewBox="0 0 48 48" aria-hidden="true">${ICON[t.kind]}</svg><i></i></div>
-      <div class="st r"><b>${esc(rv(d,"To")||"To?")}</b><small>${esc(arr)}</small></div></div>
+      <div class="st r"><b${fitName(to.name)}>${esc(to.name||"To?")}</b><small>${esc(sub(to.code,arr))}</small></div></div>
     <div class="tear"></div>
     <div class="rf">${(foot.length?foot:["PNR "+(d.head[1]||"not found")]).map(x=>"<span>"+esc(x)+"</span>").join("")}</div></button>`;
 }
+function renderNext(all){
+  const el=$("next");
+  if(!all.length){el.innerHTML='<div class="empty"><b>No trips yet</b>Drag a ticket below and it will show up here.</div>';return}
+  const now=Date.now(),seen=new Set(),short=ms=>new Date(ms).toLocaleDateString("en-IN",{day:"numeric",month:"short"}).toUpperCase();
+  /* dated tickets, earliest first; the same PNR saved twice is shown once */
+  const w=all.map(t=>({t,j:journeyTime(t.d)})).filter(x=>x.j).sort((a,b)=>a.j-b.j||a.t.saved-b.t.saved)
+    .filter(x=>{const k=x.t.kind+"|"+(x.t.d.head[1]||x.t.id);if(seen.has(k))return false;seen.add(k);return true});
+  const first=w.find(x=>x.j>=now-36e5);
+  if(!first){
+    const t=all.slice().sort((a,b)=>b.saved-a.saved)[0],j=journeyTime(t.d);
+    el.innerHTML=homeCard(t,"LAST SAVED"+(j?", "+short(j):""),false,"Open the last saved "+t.kind+" ticket");return;
+  }
+  /* every journey that departs on that same calendar day, including one already finished earlier today */
+  const day=new Date(first.j).toDateString(),list=w.filter(x=>new Date(x.j).toDateString()===day);
+  const route=t=>[stn(rv(t.d,"From")).name,stn(rv(t.d,"To")).name].filter(Boolean).join(" to ");
+  if(list.length===1){el.innerHTML=homeCard(first.t,"NEXT TRIP, "+short(first.j),false,"Open next "+first.t.kind+" ticket, "+route(first.t));return}
+  const t0=new Date();t0.setHours(0,0,0,0);
+  const dd=Math.round((new Date(first.j).setHours(0,0,0,0)-t0)/864e5);
+  const fd=new Date(first.j),dname=(dd===0?"Today, ":dd===1?"Tomorrow, ":"")+fd.toLocaleDateString("en-IN",{weekday:"short"})+" "+fd.toLocaleDateString("en-IN",{day:"numeric",month:"short"});
+  let h=`<div class="dayh"><b>${esc(dname)}</b><span>${list.length} journeys</span></div><ol class="dayl" aria-label="Journeys on ${esc(dname)}">`;
+  list.forEach((x,i)=>{
+    x.arr=x.t.kind==="train"?whenMs(rv(x.t.d,"Arrival")):null;
+    const done=now>(x.arr||x.j+36e5);
+    const state=done?(x.arr?"ARRIVED "+hhmm(x.arr):"DEPARTED "+hhmm(x.j)):"DEPARTS "+hhmm(x.j);
+    let gap="";
+    if(i){
+      const pv=list[i-1],kind=pv.t.kind==="train"?"train":"bus",diff=x.j-(pv.arr||pv.j);
+      gap=pv.arr&&diff<0?`<div class="gap bad">Leaves before the ${kind} above arrives. Check both tickets.</div>`
+        :diff<=0?`<div class="gap bad">Leaves at the same time as the ${kind} above. Check both tickets.</div>`
+        :`<div class="gap">${dur(diff)} after the ${kind} ${pv.arr?"arrives":"leaves"}</div>`;
+    }
+    h+=`<li>${gap}${homeCard(x.t,`<span>JOURNEY ${i+1} OF ${list.length}</span><span>${state}</span>`,done,
+      `Open ${x.t.kind} ticket, journey ${i+1} of ${list.length}, ${state.toLowerCase()}, ${route(x.t)}`)}</li>`;
+  });
+  el.innerHTML=h+"</ol>";
+}
+/* keep Today, Tomorrow and finished journeys correct when the app is reopened later */
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)renderNext(tkAll())});
 $("next").onclick=e=>{const b=e.target.closest("[data-o]");if(b){tap();openTicket(b.dataset.o)}};
 
 /* reset: delete everything this app stored */
 $("reset").onclick=()=>{
-  modal(`<h2>Delete all data?</h2><p class="note" style="margin:0">This removes everything Wallet has saved on this device: saved tickets, ID proofs, reminders and your name. It cannot be undone. An alarm already set in your Clock app has to be deleted there.</p>
+  modal(`<h2>Delete all data?</h2><p class="note" style="margin:0">This removes everything Wallet has saved on this device: saved tickets, ID proofs and your name. It cannot be undone. The offline reader stays, so Wallet still works without internet.</p>
     <button class="btn danger" id="rgo">Delete everything</button><button class="btn ghost" data-close>Cancel</button><div class="note" id="rmsg" role="status" style="margin:0"></div>`);
   $("rgo").onclick=resetAll;
 };
@@ -1006,7 +1252,7 @@ async function resetAll(){
   $("rmsg").textContent="Deleting…";
   try{localStorage.clear()}catch(e){}
   try{sessionStorage.clear()}catch(e){}
-  tkMem=[];remMem=[];mem=[];ids=[];tkPersist=true;idPersist=true;
+  tkMem=[];mem=[];ids=[];tkPersist=true;idPersist=true;
   try{
     if(dbc){dbc.close();dbc=null}
     if(window.indexedDB)await new Promise(res=>{const q=indexedDB.deleteDatabase("ticket-analyser");q.onsuccess=q.onerror=q.onblocked=()=>res()});
@@ -1014,7 +1260,7 @@ async function resetAll(){
   try{await caches.delete("ta-share")}catch(e){}
   try{const reg=await navigator.serviceWorker.getRegistration();if(reg)(await reg.getNotifications({includeTriggered:true})).forEach(n=>n.close())}catch(e){}
   uname="";nameMem="";
-  renderIds();renderTickets();paintName();
+  renderIds();renderTickets();paintName();renderLog();
   closeModal();nav("home");showGate();
 }
 
@@ -1029,36 +1275,165 @@ function initApp(){
 initApp();
 refreshIds();
 renderTickets();
-checkDue();intakeShared();
+dropOldReminders();renderLog();intakeShared();
 
-/* ---------- install as an app + offline ---------- */
+/* ---------- offline: keep the readers on this phone so tickets and IDs can be added without internet ---------- */
+let offP=null,offFailed=false;
+const cachedOK=async u=>{try{return !!(await caches.match(u,{ignoreVary:true}))}catch(e){return false}};
+async function offStatus(){
+  const sw=!!(navigator.serviceWorker&&navigator.serviceWorker.controller)&&"caches" in window;
+  if(!sw)return{sw,pdf:false,ocr:false};
+  const pdf=(await cachedOK(LIBS.pdf))&&(await cachedOK(LIBS.pdfw));
+  const ocr=pdf&&(await cachedOK(LIBS.tess))&&(await cachedOK(LIBS.tw))&&(await cachedOK(LIBS.core))&&langsHave().includes("eng");
+  return{sw,pdf,ocr};
+}
+function swControlled(ms){
+  if(!navigator.serviceWorker)return Promise.reject(new Error("no service worker"));
+  if(navigator.serviceWorker.controller)return Promise.resolve();
+  return new Promise((res,rej)=>{const t=setTimeout(()=>rej(new Error("service worker not ready")),ms);
+    navigator.serviceWorker.addEventListener("controllerchange",()=>{clearTimeout(t);res()},{once:true})});
+}
+function prepareOffline(){
+  if(offP)return offP;
+  offP=(async()=>{
+    if(!navigator.onLine)throw new Error("offline");
+    await swControlled(30000); /* downloads must pass through the service worker to be kept */
+    paintOffline();
+    for(const u of Object.values(LIBS)){const r=await fetch(u,{mode:"cors",credentials:"omit"});if(!r.ok)throw new Error("download failed");await r.blob()}
+    if(!langsHave().includes("eng"))await (await makeOcrWorker("eng",()=>{})).terminate();
+    if(!langsHave().includes("kan")&&!kanBad)try{await (await makeOcrWorker("kan",()=>{})).terminate()}catch(e){} /* for Kannada on bus tickets; optional */
+  })().then(()=>{offFailed=false},()=>{offFailed=true}).finally(()=>{offP=null;paintOffline()});
+  return offP;
+}
+async function autoPrepare(){if(navigator.onLine&&!(await offStatus()).ocr)prepareOffline()}
+async function paintOffline(){
+  const s=await offStatus(),on=navigator.onLine,st=$("offst"),go=$("offgo"),bar=$("offbar");
+  st.textContent=!navigator.serviceWorker||!("caches" in window)?"This browser can't keep Wallet for offline use. On Android, open it in Chrome. On iPhone, add it to the Home Screen."
+    :s.ocr?"Ready. Tickets and ID cards can be added without internet."
+    :offP?"Getting Wallet ready to work without internet. This downloads about 8 MB, once."
+    :!on?"Not ready yet. Connect to the internet and open Wallet once to finish."
+    :offFailed?"Setup didn't finish. Check your connection and try again.":"Not ready yet.";
+  go.hidden=!(on&&!s.ocr&&!offP&&navigator.serviceWorker);go.textContent=offFailed?"Try again":"Set up now";
+  bar.hidden=on;
+  bar.querySelector("span").textContent=s.ocr?"You're offline. You can still add tickets and ID cards."
+    :s.pdf?"You're offline. PDF tickets and ID cards can be added. Photos and scanned tickets need one online visit first."
+    :"You're offline. Your saved tickets and ID cards are here. Reading new tickets needs one online visit first.";
+}
+$("offgo").onclick=()=>{prepareOffline();paintOffline()};
+addEventListener("online",()=>{paintOffline();autoPrepare()});
+addEventListener("offline",paintOffline);
+if(navigator.serviceWorker)navigator.serviceWorker.addEventListener("controllerchange",()=>{paintOffline();autoPrepare()});
+
+/* ---------- install as an app ---------- */
 function keepStorage(){try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}}
 let deferred=null;
-const standalone=()=>matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+const standalone=()=>["standalone","fullscreen","minimal-ui"].some(m=>matchMedia("(display-mode: "+m+")").matches)||navigator.standalone===true;
+
+/* Which browser is this? Decides which install steps to show. Users can switch if it guesses wrong. */
+function detectBrowser(){
+  const ua=navigator.userAgent,ios=/iPad|iPhone|iPod/.test(ua)||(/Macintosh/.test(ua)&&navigator.maxTouchPoints>1),android=/Android/i.test(ua);
+  if(/FBAN|FBAV|FB_IAB|Instagram|Snapchat|LinkedInApp|Line\/|MicroMessenger/i.test(ua)||(android&&/; wv\)/.test(ua))||(ios&&(/GSA\//.test(ua)||!/Safari\//.test(ua))))return"inapp";
+  if(ios)return/CriOS/.test(ua)?"chrome_ios":/FxiOS/.test(ua)?"firefox_ios":/EdgiOS/.test(ua)?"edge_ios":/OPiOS|OPT\//.test(ua)?"other_ios":"safari_ios";
+  if(android){
+    if(/SamsungBrowser/.test(ua))return"samsung";
+    if(/Firefox\//.test(ua))return"firefox";
+    if(/EdgA\//.test(ua))return"edge";
+    if(/OPR\/|Opera/.test(ua))return"opera";
+    if(/MiuiBrowser|XiaoMi|UCBrowser|VivoBrowser|HeyTapBrowser|OppoBrowser|JioSphere|JioPages|YaBrowser|Puffin|Opera Mini/i.test(ua))return"other_android";
+    if(/Chrome\//.test(ua))return"chrome"; /* Brave and Vivaldi report as Chrome and use the same menu */
+    return"other_android";
+  }
+  if(/Firefox\//.test(ua))return"firefox_desktop";
+  if(/Safari\//.test(ua)&&!/Chrome|Chromium|Edg\//.test(ua))return"safari_mac";
+  return"desktop";
+}
+const SHARE_SVG='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3M8 7l4-4 4 4M6 11H5v10h14V11h-1"/></svg>';
+const K={dots:'<span class="kbd" aria-label="three dots menu">⋮</span>',lines:'<span class="kbd" aria-label="three lines menu">≡</span>',
+  more:'<span class="kbd" aria-label="more">⋯</span>',share:'<span class="kbd" aria-label="Share">'+SHARE_SVG+'</span>',plus:'<span class="kbd" aria-label="install">⊕</span>'};
+const HOW={
+  chrome:{name:"Chrome",os:"android",steps:[`Tap ${K.dots} at the top right.`,`Tap <b>Install app</b> (or <b>Add to Home screen</b>), then <b>Install</b>.`],tip:"If the menu shows Open in app instead, Wallet is already installed."},
+  samsung:{name:"Samsung Internet",os:"android",steps:[`Tap ${K.lines} at the bottom right.`,`Tap <b>Add page to</b>, then <b>Home screen</b>.`,`Tap <b>Add</b>.`],tip:"Samsung Internet may also show an install icon in the address bar. Tapping it does the same thing."},
+  firefox:{name:"Firefox",os:"android",steps:[`Tap ${K.dots} (top or bottom right).`,`Tap <b>Install</b>. If you don't see it, look under <b>More</b>.`,`Tap <b>Add automatically</b>, or drag the icon onto your home screen.`]},
+  edge:{name:"Edge",os:"android",steps:[`Tap ${K.more} at the bottom of the screen.`,`Tap <b>Add to phone</b> (on some versions <b>Install app</b>), then <b>Install</b>.`]},
+  opera:{name:"Opera",os:"android",steps:[`Tap ${K.dots} at the top right.`,`Tap <b>Add to</b>, then <b>Home screen</b>, then <b>Add</b>.`]},
+  other_android:{name:"your browser",os:"android",steps:[`Open your browser's menu (${K.dots} or ${K.lines}).`,`Look for <b>Install app</b> or <b>Add to Home screen</b> and tap it.`,`If it isn't there, open this page in Chrome, Samsung Internet, Firefox or Edge and install from there.`]},
+  safari_ios:{name:"Safari",os:"ios",steps:[`Tap ${K.share} <b>Share</b>. On iOS 26, tap ${K.more} first, then Share.`,`Scroll down and tap <b>Add to Home Screen</b>.`,`Keep <b>Open as Web App</b> on, then tap <b>Add</b>.`]},
+  chrome_ios:{name:"Chrome",os:"ios",steps:[`Tap ${K.share} <b>Share</b> in the address bar (or ${K.more}, then Share).`,`Tap <b>Add to Home Screen</b>, then <b>Add</b>.`]},
+  edge_ios:{name:"Edge",os:"ios",steps:[`Tap ${K.more} at the bottom, then ${K.share} <b>Share</b>.`,`Tap <b>Add to Home Screen</b>, then <b>Add</b>.`]},
+  firefox_ios:{name:"Firefox",os:"ios",steps:[`Tap ${K.lines} at the bottom right, then ${K.share} <b>Share</b>.`,`Tap <b>Add to Home Screen</b>, then <b>Add</b>.`]},
+  other_ios:{name:"your browser",os:"ios",steps:[`Tap ${K.share} <b>Share</b> in your browser.`,`Tap <b>Add to Home Screen</b>, then <b>Add</b>.`,`If there's no Share option, open this page in Safari and install from there.`]},
+  safari_mac:{name:"Safari",os:"desktop",steps:[`In the menu bar, choose <b>File</b>, then <b>Add to Dock</b>.`,`Click <b>Add</b>.`]},
+  desktop:{name:"this browser",os:"desktop",steps:[`Click the ${K.plus} install icon at the right end of the address bar.`,`If there isn't one, open the browser menu and look for <b>Install</b> or <b>Apps</b>.`]},
+  firefox_desktop:{name:"Firefox",os:"desktop",steps:[],tip:"Firefox on computers doesn't install web apps for most people. Keep Wallet open in a tab, or open this page in Chrome, Edge or Safari to install it."},
+  inapp:{name:"another app",os:"any",steps:[`Tap ${K.dots} or ${K.more} at the top of this screen.`,`Tap <b>Open in browser</b> (or Open in Chrome, Open in Safari).`,`Install Wallet from the browser that opens.`],tip:"Apps like Instagram, Facebook and LinkedIn open links in their own viewer, which can't install apps or keep your tickets safely."}
+};
+const PICKS={android:["chrome","samsung","firefox","edge","opera","other_android"],ios:["safari_ios","chrome_ios","edge_ios","firefox_ios"],desktop:["desktop","safari_mac","firefox_desktop"]};
+const PICKNAME={chrome:"Chrome",samsung:"Samsung Internet",firefox:"Firefox",edge:"Edge",opera:"Opera",other_android:"Other",safari_ios:"Safari",chrome_ios:"Chrome",edge_ios:"Edge",firefox_ios:"Firefox",desktop:"Chrome or Edge",safari_mac:"Safari",firefox_desktop:"Firefox"};
+const LOGO='<svg class="logo" viewBox="0 0 72 48" aria-hidden="true"><rect x="2" y="4" width="68" height="40" rx="8" fill="#b4560f"/><circle cx="48" cy="4" r="5" fill="#fff"/><circle cx="48" cy="44" r="5" fill="#fff"/><path d="M48 10v28" stroke="#fde6cf" stroke-width="2" stroke-dasharray="3 3"/><path d="M14 24h20M28 18l6 6-6 6" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+let instPick=null;
+const installedHere=()=>{try{return localStorage.getItem("ta-installed")==="1"}catch(e){return false}};
+function howHTML(b){
+  const h=HOW[b],ua=navigator.userAgent,os=h.os==="any"?(/iPad|iPhone|iPod/.test(ua)?"ios":/Android/i.test(ua)?"android":"desktop"):h.os;
+  const notes=[];
+  if(h.tip)notes.push(h.tip);
+  if(os==="ios")notes.push("Tickets and ID cards saved here in the browser don't move into the Home Screen app. Install first, then add them inside the app.",
+    "iPhone doesn't let web apps appear in the Share menu. Save a ticket to Files or Photos, then tap Upload in Wallet.");
+  else if(os==="android"){
+    notes.push("Your saved tickets stay with the browser they were saved in, so install from that same browser.");
+    if(["chrome","samsung","opera"].includes(b))notes.push("Once installed, Wallet appears in your phone's Share menu, so you can share a ticket PDF straight to it.");
+    if(b==="firefox")notes.push("Firefox doesn't add Wallet to the Share menu. Use Upload inside the app instead.");
+  }
+  const picks=PICKS[os]||[];
+  return `${h.steps.length?`<ol class="steps">${h.steps.map(x=>"<li>"+x+"</li>").join("")}</ol>`:""}
+    ${notes.map(n=>`<p class="instnote">${esc(n)}</p>`).join("")}
+    ${b==="inapp"?'<button class="btn sm" data-inst="copy">Copy link to open in your browser</button><div class="instnote" data-copymsg role="status"></div>':""}
+    ${b!=="inapp"&&picks.length?`<div class="instpick"><span>Using a different browser?</span><div class="chips2" role="radiogroup" aria-label="Your browser">${picks.map(k=>`<button role="radio" aria-checked="${k===b}" class="${k===b?"on":""}" data-inst-pick="${k}">${PICKNAME[k]}</button>`).join("")}</div></div>`:""}`;
+}
+function openHowSheet(){
+  const b=instPick||detectBrowser();
+  modal(`<h2>${b==="inapp"?"Open Wallet in your browser":"Install Wallet"+(HOW[b].name.startsWith("your")||HOW[b].name.startsWith("this")||!HOW[b].steps.length?"":" in "+HOW[b].name)}</h2>
+    <div id="howbody" style="display:flex;flex-direction:column;gap:12px">${howHTML(b)}</div>
+    <button class="btn" data-close>Done</button>`);
+}
 function showInstall(){
   const h=$("inst"),st=$("inst2"),sec=$("instsec");
   if(standalone()){h.hidden=true;sec.hidden=true;return}
+  const b=instPick||detectBrowser(),inapp=b==="inapp",done=installedHere()&&!inapp;
   sec.hidden=false;
-  if(deferred){
-    h.innerHTML='<button class="btn">Install Wallet on this phone</button>';h.hidden=false;
-    st.innerHTML='<button class="btn">Install Wallet</button>';
-    [h,st].forEach(el=>el.querySelector("button").onclick=async()=>{deferred.prompt();try{await deferred.userChoice}catch(e){}deferred=null;showInstall()});
-  }else{
-    h.hidden=true;
-    st.innerHTML=/iPad|iPhone|iPod/.test(navigator.userAgent)
-      ?'<p class="note" style="margin:0">To install Wallet on this iPhone: tap Share, then Add to Home Screen. Install it before saving tickets, because the installed app keeps its own saved items. Apple does not let web apps appear in the iPhone Share menu, so save the PDF or photo to Files or Photos first, then tap Upload ticket.</p>'
-      :'<p class="note" style="margin:0">Open this page in Chrome and choose Install app from the menu to add Wallet to your home screen. It then opens like a normal app and works offline.</p>';
-  }
+  st.innerHTML=done?'<p class="instnote">Wallet is installed. Open it from your home screen or app list.</p>'
+    :(deferred&&!inapp?'<p style="margin:0 0 12px"><button class="btn" data-inst="go">Install Wallet</button></p><p class="instnote" style="margin-bottom:10px">Or use the browser menu:</p>':"")
+      +`<div style="display:flex;flex-direction:column;gap:12px">${howHTML(b)}</div>`;
+  let later=0;try{later=+localStorage.getItem("ta-inst-later")||0}catch(e){}
+  h.hidden=done||Date.now()<later;
+  h.innerHTML=`<div class="instcard">${LOGO}<div style="flex:1;min-width:0">
+    <b>${inapp?"Open Wallet in your browser":"Install Wallet"}</b>
+    <p>${inapp?"You opened Wallet inside another app. Open it in your browser to install it and keep your tickets.":"Opens like an app from your home screen and works without internet."}</p>
+    <div class="acts2">${deferred&&!inapp?'<button class="btn sm" data-inst="go">Install</button>':'<button class="btn sm" data-inst="how">Show me how</button>'}
+    ${inapp?'<button class="btn sm ghost" data-inst="copy">Copy link</button>':'<button class="btn sm ghost" data-inst="later">Not now</button>'}</div>
+    <div class="instnote" data-copymsg role="status"></div></div></div>`;
 }
+document.addEventListener("click",async e=>{
+  const pk=e.target.closest("[data-inst-pick]");
+  if(pk){instPick=pk.dataset.instPick;const hb=$("howbody");if(hb&&$("modal").classList.contains("on"))hb.innerHTML=howHTML(instPick);showInstall();return}
+  const b=e.target.closest("[data-inst]");if(!b)return;
+  const a=b.dataset.inst;tap();
+  if(a==="go"&&deferred){const d=deferred;d.prompt();let r=null;try{r=await d.userChoice}catch(x){}deferred=null;if(r&&r.outcome==="accepted"){try{localStorage.setItem("ta-installed","1")}catch(x){}}showInstall()}
+  else if(a==="how")openHowSheet();
+  else if(a==="later"){try{localStorage.setItem("ta-inst-later",String(Date.now()+14*864e5))}catch(x){}$("inst").hidden=true}
+  else if(a==="copy"){const ok=await copyText(location.origin+location.pathname);
+    document.querySelectorAll("[data-copymsg]").forEach(m=>m.textContent=ok?"Link copied. Paste it into Chrome, Samsung Internet, Safari or another browser.":"Couldn't copy here. Use the menu to open this page in your browser.")}
+});
 addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;showInstall()});
-addEventListener("appinstalled",()=>{deferred=null;showInstall()});
+addEventListener("appinstalled",()=>{deferred=null;try{localStorage.setItem("ta-installed","1")}catch(x){}showInstall()});
+matchMedia("(display-mode: standalone)").addEventListener?.("change",showInstall);
+
 /* ---------- share-menu checker ---------- */
 $("chk").addEventListener("toggle",async()=>{
   if(!$("chk").open)return;
-  const o=$("chkout"),L=[],add=(g,t)=>L.push((g?"OK: ":"FIX: ")+t);
+  const o=$("chkout"),L=[],add=(g,t)=>L.push((g?"OK: ":"FIX: ")+t),b=detectBrowser();
   o.textContent="Checking…";
   add(location.protocol==="https:"||location.hostname==="localhost","Page is served over HTTPS (needed to install)");
-  add((/Android/i.test(navigator.userAgent)&&/Chrome/i.test(navigator.userAgent)&&!/SamsungBrowser|Firefox|Edg|OPR/i.test(navigator.userAgent))||standalone(),"Opened in Chrome on Android, or inside the installed app (other browsers may not add a share target)");
+  add(["chrome","samsung","opera"].includes(b)||(standalone()&&/Android/i.test(navigator.userAgent)),"Opened in Chrome, Samsung Internet or Opera on Android, or inside the installed app ("+(b.endsWith("ios")?"iPhone doesn't support web apps in the Share menu":b==="firefox"?"Firefox doesn't add web apps to the Share menu":"this browser may not add web apps to the Share menu")+")");
   try{const r=await navigator.serviceWorker.getRegistration();add(!!(r&&r.active),"Service worker is active")}catch(e){add(false,"Service worker is not available here")}
   try{
     const href=document.querySelector("link[rel=manifest]").href,m=await (await fetch(href,{cache:"no-store"})).json();
@@ -1071,9 +1446,12 @@ $("chk").addEventListener("toggle",async()=>{
       add(good,n+"x"+n+" icon loads"+(ic?"":" (missing from manifest)"));
     }
   }catch(e){add(false,"Manifest could not be read")}
-  o.innerHTML=L.map(x=>"<div>"+esc(x)+"</div>").join("")+"<div style=\"margin-top:8px\">If all are OK: delete the old home-screen icon, open the site in Chrome, choose menu &gt; Install app (not just Add to Home screen), then in the share sheet swipe to the second page of apps.</div>";
+  o.innerHTML=L.map(x=>"<div>"+esc(x)+"</div>").join("")+"<div style=\"margin-top:8px\">If all are OK: remove the old home-screen icon, install Wallet again from the browser menu (Install app, or Add page to &gt; Home screen in Samsung Internet), then in the share sheet swipe to see more apps.</div>";
 });
 showInstall();
+/* start the PDF reader in the background so the first upload does not wait for it */
+{const warm=()=>{try{if(typeof pdfjsLib!=="undefined")pdfWorker().catch(()=>{})}catch(e){}paintOffline();setTimeout(autoPrepare,2500)};
+ if(window.requestIdleCallback)requestIdleCallback(warm,{timeout:3000});else setTimeout(warm,1200)}
 if("serviceWorker" in navigator&&/^https?:$/.test(location.protocol))navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
 </body>
