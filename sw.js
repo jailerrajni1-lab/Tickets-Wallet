@@ -1,34 +1,20 @@
-/* Wallet service worker: works offline, and picks up new deployments quickly */
-const V="wallet-v1";
-const SHELL=["./","index.html","manifest.webmanifest","icon-192.png","icon-512.png","apple-touch-icon.png"];
-const CDN=["cdnjs.cloudflare.com","cdn.jsdelivr.net","unpkg.com","fonts.googleapis.com","fonts.gstatic.com","tessdata.projectnaptha.com"];
-
-self.addEventListener("install",e=>{
-  e.waitUntil(caches.open(V).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()));
-});
-self.addEventListener("activate",e=>{
-  e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==V).map(x=>caches.delete(x)))).then(()=>self.clients.claim()));
-});
-
-const net=(r,ms)=>new Promise((res,rej)=>{
-  const t=setTimeout(()=>rej(new Error("timeout")),ms);
-  fetch(r).then(x=>{clearTimeout(t);res(x)},x=>{clearTimeout(t);rej(x)});
-});
-const keep=(r,res)=>{
-  if(res&&(res.ok||res.type==="opaque")&&res.status!==206){const cp=res.clone();caches.open(V).then(c=>c.put(r,cp)).catch(()=>{})}
-  return res;
-};
-
+const V="wallet-v2",SHELL=["./","index.html","manifest.webmanifest","icon-192.png"];
+self.addEventListener("install",e=>{e.waitUntil(caches.open(V).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()))});
+self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==V&&k!=="ta-share").map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener("fetch",e=>{
-  const r=e.request;
-  if(r.method!=="GET")return;
-  const u=new URL(r.url);
-  if(u.origin===location.origin){
-    /* network first, so a new deployment shows at once; the cache is the offline fallback */
-    e.respondWith(net(r,4000).then(res=>keep(r,res)).catch(()=>
-      caches.match(r,{ignoreSearch:true}).then(m=>m||(r.mode==="navigate"?caches.match("index.html"):Response.error()))));
-  }else if(CDN.includes(u.hostname)){
-    /* libraries and fonts: cache first, fetched once */
-    e.respondWith(caches.match(r).then(m=>m||fetch(r).then(res=>keep(r,res))));
+  const r=e.request,u=new URL(r.url);
+  if(r.method==="POST"&&u.pathname.endsWith("/share-target")){
+    e.respondWith((async()=>{
+      try{
+        const fd=await r.formData(),files=fd.getAll("ticket").filter(f=>f&&f.size),c=await caches.open("ta-share");
+        for(const k of await c.keys())await c.delete(k);
+        for(let i=0;i<files.length;i++)await c.put("/shared/"+i,new Response(files[i],{headers:{"content-type":files[i].type||"application/octet-stream","x-name":encodeURIComponent(files[i].name||"ticket")}}));
+      }catch(x){}
+      return Response.redirect(new URL("./?shared=1",self.registration.scope).href,303);
+    })());
+    return;
   }
+  if(r.method!=="GET")return;
+  e.respondWith(fetch(r).then(res=>{if(res.ok&&(u.origin===location.origin||u.hostname==="cdnjs.cloudflare.com")){const cp=res.clone();caches.open(V).then(c=>c.put(r,cp))}return res}).catch(()=>caches.match(r,{ignoreSearch:true}).then(m=>m||caches.match("./"))));
 });
+self.addEventListener("notificationclick",e=>{e.notification.close();e.waitUntil(self.clients.matchAll({type:"window"}).then(cs=>cs[0]?cs[0].focus():self.clients.openWindow("./")))});
