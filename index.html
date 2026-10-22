@@ -5,16 +5,17 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Wallet</title>
 <link rel="manifest" href="manifest.webmanifest">
-<meta name="theme-color" content="#14213d">
+<meta name="theme-color" content="#f4efe6">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Wallet">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="format-detection" content="telephone=no">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#e8edf1;--ink:#14213d;--mute:#5b6b82;--card:#fff;--line:#c9d3de;--bus:#0f766e;--train:#3730a3;--acc:var(--bus)}
+:root{--bg:#f4efe6;--ink:#2a2418;--mute:#7a6f5a;--card:#fff;--line:#e0d8c6;--bus:#0f766e;--train:#3730a3;--or:#b4560f;--acc:var(--bus)}
 body.train{--acc:var(--train)}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,sans-serif;min-height:100vh;display:flex;justify-content:center;padding:max(28px,env(safe-area-inset-top)) max(16px,env(safe-area-inset-right)) max(28px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left))}
@@ -107,38 +108,109 @@ details{margin-top:12px;color:var(--mute);font-size:.85rem}pre{white-space:pre-w
 .rem{background:var(--card);border-radius:14px;padding:12px 16px;margin:8px 0;display:flex;gap:10px;align-items:center;justify-content:space-between}
 .rem small{color:var(--mute);display:block;word-break:break-word}
 button,.btn{-webkit-tap-highlight-color:transparent;touch-action:manipulation;min-height:40px}
+
+/* ===== app shell (new interface) ===== */
+html{-webkit-text-size-adjust:100%;overscroll-behavior-y:none}
+body{overscroll-behavior-y:none;padding-bottom:0;-webkit-user-select:none;user-select:none}
+input,textarea,select,pre,.row input,.p input{-webkit-user-select:text;user-select:text}
+main{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+.screen.on{animation:scr .2s ease-out}
+@keyframes scr{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px}
+.top .hi{color:var(--mute);font-size:.82rem}
+.top h1{margin:2px 0 0;font-size:1.65rem;line-height:1.15;overflow-wrap:anywhere}
+.avatar{all:unset;box-sizing:border-box;cursor:pointer;flex:none;width:42px;height:42px;border-radius:50%;background:var(--bus);color:#e1f5ee;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.05rem}
+.avatar:focus-visible,.rc:focus-visible,.dz:focus-visible,.tabbar button:focus-visible,.counts button:focus-visible,.tsel button:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+.rc{all:unset;box-sizing:border-box;cursor:pointer;display:block;width:100%;position:relative;overflow:hidden;background:var(--c);color:#fff;border-radius:16px;padding:14px;margin:6px 0 12px}
+.rc.train{--c:var(--train)}.rc.bus{--c:var(--bus)}
+.rt{font-size:.68rem;letter-spacing:.05em;opacity:.88}
+.rr{display:flex;align-items:center;gap:8px;margin-top:6px}
+.st{min-width:0;flex:0 1 38%}.st.r{text-align:right}
+.st b{display:block;font-size:1.4rem;font-weight:800;line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.st small{opacity:.88;font-size:.74rem}
+.mid{flex:1;text-align:center;min-width:34px}
+.mid svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.mid i{display:block;border-top:1.5px dashed rgba(255,255,255,.6);margin:1px 4px}
+.tear{position:relative;border-top:1.5px dashed rgba(255,255,255,.55);margin:14px -14px 10px}
+.tear::before,.tear::after{content:"";position:absolute;top:-8px;width:14px;height:14px;border-radius:50%;background:var(--bg)}
+.tear::before{left:-7px}.tear::after{right:-7px}
+.rf{display:flex;justify-content:space-between;gap:4px 10px;font-size:.8rem;flex-wrap:wrap}
+.empty{border:1.5px dashed var(--line);border-radius:16px;padding:20px 14px;text-align:center;color:var(--mute);margin:6px 0 12px;background:rgba(255,255,255,.55);line-height:1.45}
+.empty b{display:block;color:var(--ink);font-size:1.05rem;margin-bottom:2px}
+.dz{display:flex;align-items:center;justify-content:center;gap:10px;border:1.5px dashed var(--or);border-radius:14px;background:#fff;padding:18px 12px;cursor:pointer;font-weight:600;text-align:center}
+.dz.over{background:#fdf1e4}
+.dz input{display:none}
+.dz svg{flex:none;width:22px;height:22px;stroke:var(--or);fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tsel{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:10px 2px 0;font-size:.82rem;color:var(--mute)}
+.tsel span{margin-right:2px}
+.tsel button{all:unset;box-sizing:border-box;cursor:pointer;padding:5px 13px;min-height:34px;border-radius:999px;box-shadow:inset 0 0 0 1px var(--line);display:inline-flex;align-items:center;color:var(--ink);font-weight:600}
+.tsel button.on{background:var(--ink);color:#fff;box-shadow:none}
+.counts{display:flex;gap:8px;margin-top:14px}
+.counts button{all:unset;box-sizing:border-box;cursor:pointer;flex:1;text-align:center;border-radius:12px;padding:12px 10px;min-height:44px}
+.counts .t{background:#fde6cf;color:#8a6a52}.counts .t b{color:#712b13}
+.counts .i{background:#e3efe6;color:#4f7a62}.counts .i b{color:#27500a}
+.counts b{font-weight:800;font-size:1.1rem}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:5;background:#fff;border-top:1px solid var(--line);display:flex;justify-content:center;padding:4px 8px calc(4px + env(safe-area-inset-bottom))}
+.tabbar>div{display:flex;width:100%;max-width:560px}
+.tabbar button{all:unset;box-sizing:border-box;cursor:pointer;flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;min-height:52px;color:var(--mute);font-size:.7rem;font-weight:600;-webkit-tap-highlight-color:transparent}
+.tabbar button.on{color:var(--or)}
+.tabbar svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.gate{position:fixed;inset:0;z-index:30;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px}
+.gcard{width:100%;max-width:400px;display:flex;flex-direction:column;gap:12px}
+.gcard h1{margin:6px 0 0}
+.gcard .sub{margin:0}
+.gate input,.set input[type=text]{font:inherit;font-size:1.05rem;font-weight:600;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);min-width:0;width:100%}
+.gate input:focus,.set input[type=text]:focus{outline:0;border-color:var(--or)}
+.set{background:var(--card);border-radius:14px;padding:14px 16px;margin:12px 0}
+.set h2{font-size:1rem;margin:0 0 10px}
+.set .nrow{display:flex;gap:8px}.set .nrow .btn{flex:none}
+.set details{margin:0}
+.idform input{flex:1;min-width:0;font:inherit;font-weight:600;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:9px 10px}
+.idform label{flex:0 0 64px}
+.btn.danger{background:#b42318}
+.btn.dangerline{background:transparent;color:#b42318;box-shadow:inset 0 0 1.5px 1.5px #b42318}
+#inst .btn{display:block;text-align:center;margin-top:16px}
+@media(prefers-reduced-motion:reduce){.screen.on{animation:none}}
 </style>
 </head>
 <body>
+<div id="gate" class="gate" role="dialog" aria-modal="true" aria-labelledby="gt" hidden>
+  <div class="gcard">
+    <svg viewBox="0 0 72 48" width="72" height="48" aria-hidden="true"><rect x="2" y="4" width="68" height="40" rx="8" fill="#b4560f"/><circle cx="48" cy="4" r="5" fill="#f4efe6"/><circle cx="48" cy="44" r="5" fill="#f4efe6"/><path d="M48 10v28" stroke="#fde6cf" stroke-width="2" stroke-dasharray="3 3"/><path d="M14 24h20M28 18l6 6-6 6" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <h1 id="gt">Welcome to Wallet</h1>
+    <p class="sub">What should we call you? Your name stays on this device.</p>
+    <input id="gname" type="text" maxlength="30" autocomplete="given-name" placeholder="Priya" aria-label="Your name">
+    <div class="err" id="gerr" role="alert" hidden>Enter your name to continue.</div>
+    <button class="btn" id="gok" style="text-align:center">Continue</button>
+  </div>
+</div>
 <main>
 <section id="s1" class="screen on">
-  <h1>Wallet</h1>
-  <p class="sub">Your tickets and ID, ready for the check.</p>
-  <h2 class="grp">Saved</h2>
-  <div class="pick">
-    <button class="stub" id="tkstub" style="--c:#b45309"><span><b>My tickets</b><small id="tkcount">Not saved yet</small></span>
-      <svg viewBox="0 0 48 48"><path d="M6 14h36v7a3 3 0 0 0 0 6v7H6v-7a3 3 0 0 0 0-6z"/><path d="M30 14v20" stroke-dasharray="2 3"/></svg></button>
-    <button class="stub" id="idstub" style="--c:var(--ink)"><span><b>ID proof</b><small id="idcount">Not saved yet</small></span>
-      <svg viewBox="0 0 48 48"><rect x="6" y="11" width="36" height="26" rx="4"/><circle cx="18" cy="22" r="4"/><path d="M11 32c1-4 4-6 7-6s6 2 7 6M29 20h8M29 26h8"/></svg></button>
+  <header class="top">
+    <div><div class="hi">Welcome aboard</div><h1 id="greet">Bon Voyage</h1></div>
+    <button class="avatar" id="avatar" aria-label="Open settings">?</button>
+  </header>
+  <div id="next"></div>
+  <label class="dz" id="hdrop" tabindex="0">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V5M7 10l5-5 5 5M5 20h14"/></svg>
+    <span>Drag or upload a ticket</span>
+    <input type="file" id="hfile" accept="image/*,application/pdf">
+  </label>
+  <div class="tsel" role="radiogroup" aria-label="Ticket type">
+    <span>Ticket type</span>
+    <button role="radio" aria-checked="true" class="on" data-k="auto">Detect</button>
+    <button role="radio" aria-checked="false" data-k="bus">Bus</button>
+    <button role="radio" aria-checked="false" data-k="train">Train</button>
   </div>
-  <h2 class="grp">Add a ticket</h2>
-  <div class="pick">
-    <button class="stub" style="--c:#b45309" data-t="auto"><span><b>Upload ticket</b><small>Detects KSRTC bus or IRCTC train for you</small></span>
-      <svg viewBox="0 0 48 48"><path d="M24 34V12M15 21l9-9 9 9M10 38h28"/></svg></button>
+  <div class="counts">
+    <button class="t" id="cT"><b id="nT">0</b> <span id="lT">tickets</span></button>
+    <button class="i" id="cI"><b id="nI">0</b> <span id="lI">ID cards</span></button>
   </div>
-  <h2 class="grp">Or choose the type yourself</h2>
-  <div class="pick">
-    <button class="stub" style="--c:var(--bus)" data-t="bus"><span><b>Bus</b><small>Read a KSRTC ticket</small></span>
-      <svg viewBox="0 0 48 48"><rect x="8" y="7" width="32" height="30" rx="5"/><path d="M8 24h32M14 37v4M34 37v4"/><circle cx="16" cy="31" r="1.5"/><circle cx="32" cy="31" r="1.5"/></svg></button>
-    <button class="stub" style="--c:var(--train)" data-t="train"><span><b>Train</b><small>Read an IRCTC ticket</small></span>
-      <svg viewBox="0 0 48 48"><rect x="10" y="6" width="28" height="30" rx="6"/><path d="M10 22h28M17 42l5-6M31 42l-5-6"/><circle cx="17" cy="29" r="1.5"/><circle cx="31" cy="29" r="1.5"/></svg></button>
-  </div>
-  <div id="inst" hidden style="margin-top:22px"></div>
-  <details id="chk"><summary>Why is this app not in my Share menu?</summary><div id="chkout" class="note"></div></details>
+  <div id="inst" hidden></div>
 </section>
 
 <section id="s2" class="screen">
-  <button class="back" id="back">&larr; Change ticket type</button>
+  <button class="back" id="back">&larr; Home</button>
   <h1 id="t2"></h1>
   <p class="sub" id="s2sub"></p>
   <label class="drop" id="drop" tabindex="0">
@@ -151,31 +223,55 @@ button,.btn{-webkit-tap-highlight-color:transparent;touch-action:manipulation;mi
 </section>
 
 <section id="s3" class="screen">
-  <button class="back" id="idback">&larr; Back</button>
-  <h1>Identity proof</h1>
-  <p class="sub">Keep a copy of your ID ready for the ticket check. It is saved only in this browser on this device and is never uploaded.</p>
+  <h1>ID cards</h1>
+  <p class="sub">Keep copies of your ID proofs ready for the ticket check. They are saved only in this browser on this device and are never uploaded.</p>
   <div class="idform"><label for="idtype">ID type</label>
     <select id="idtype"><option>Aadhaar</option><option>Driving licence</option><option>Voter ID</option><option>Passport</option><option>PAN card</option><option>Other</option></select></div>
+  <div class="idform"><label for="idlabel">Label</label>
+    <input id="idlabel" type="text" maxlength="40" placeholder="Optional, like Priya Aadhaar"></div>
   <label class="drop" id="iddrop" tabindex="0">
-    <b>Add ID proof</b><span>Photo, screenshot or PDF (first page is saved). Drag it here or tap to choose.</span>
-    <input type="file" id="idfile" accept="image/*,application/pdf">
+    <b>Add ID cards</b><span>Photos, screenshots or PDFs (first page is saved). Choose several at once, or drag them here.</span>
+    <input type="file" id="idfile" multiple accept="image/*,application/pdf">
   </label>
   <div class="status" id="idst" hidden>Saving…</div>
   <div class="err" id="iderr" hidden></div>
-  <p class="note" id="idempty">Nothing saved yet.</p>
+  <h2 class="tkh">Saved IDs <small id="idn"></small></h2>
+  <p class="note" id="idempty">Nothing saved yet. Add your first ID proof above.</p>
   <div id="idlist"></div>
   <p class="note">Anyone who can open this browser on this device can see saved IDs, and clearing browser data removes them. Delete a copy when you no longer need it here. A saved copy is a backup: a TTE may still ask for the original or a DigiLocker copy.</p>
 </section>
+
 <section id="s4" class="screen">
   <div id="tklist">
-    <button class="back" id="tkback">&larr; Back</button>
-    <h1>My tickets</h1>
+    <h1>Saved tickets</h1>
     <p class="sub">Saved on this device only. Onward and return journeys are kept apart so the right one is a tap away.</p>
     <div id="tkitems"></div><div id="remitems"></div>
   </div>
   <div id="tkview"></div>
 </section>
+
+<section id="s5" class="screen">
+  <h1>Settings</h1>
+  <p class="sub">Everything Wallet keeps stays on this device.</p>
+  <div class="set"><h2>Your name</h2>
+    <div class="nrow"><input type="text" id="sname" maxlength="30" autocomplete="given-name" aria-label="Your name"><button class="btn" id="snsave">Save</button></div>
+    <div class="note" id="snmsg" role="status" style="margin:6px 0 0"></div></div>
+  <div class="set" id="instsec" hidden><h2>Install Wallet</h2><div id="inst2"></div></div>
+  <div class="set"><h2>Share menu</h2>
+    <details id="chk"><summary>Why is this app not in my Share menu?</summary><div id="chkout" class="note"></div></details></div>
+  <div class="set"><h2>Reset</h2>
+    <p class="note" style="margin:0 0 10px">Removes saved tickets, ID proofs, reminders and your name from this device, so the app starts fresh.</p>
+    <button class="btn dangerline" id="reset">Reset and delete all data</button></div>
+</section>
 </main>
+<nav class="tabbar" id="tabbar" aria-label="Main">
+  <div>
+    <button data-tab="home" class="on" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-7 8 7v9a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg>Home</button>
+    <button data-tab="tickets"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h18v3a2 2 0 0 0 0 4v3H3v-3a2 2 0 0 0 0-4z"/><path d="M14 8v10" stroke-dasharray="2 2"/></svg>Tickets</button>
+    <button data-tab="ids"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.5-2 2-3 3-3s2.5 1 3 3M14 10h4M14 14h4"/></svg>ID cards</button>
+    <button data-tab="settings"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>Settings</button>
+  </div>
+</nav>
 
 <div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="Identity proof">
   <img id="vimg" alt="">
@@ -188,15 +284,26 @@ button,.btn{-webkit-tap-highlight-color:transparent;touch-action:manipulation;mi
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.1.1/tesseract.min.js"></script>
 <script>
 const $=id=>document.getElementById(id);
-let type="bus";
+let type="auto",tsel="auto";
 
-document.querySelectorAll(".stub[data-t]").forEach(b=>b.onclick=()=>{
-  type=b.dataset.t; document.body.className=type==="auto"?"":type;
+function startUpload(file){
+  type=tsel;document.body.className=type==="auto"?"":type;
   $("t2").textContent=type==="auto"?"Upload your ticket":type==="bus"?"Upload your bus ticket":"Upload your train ticket";
   $("s2sub").textContent=type==="auto"?"KSRTC bus or IRCTC train. I will work out which it is, then read it.":type==="bus"?"KSRTC ticket. I will pick out PNR, seat number, route and date.":"IRCTC ticket. I will pick out PNR, train, route, departure and arrival, and each passenger's coach, seat number and seat type.";
-  reset(); $("s1").classList.remove("on"); $("s2").classList.add("on");
+  reset();nav("upload",true,true);run(file);
+}
+$("back").onclick=()=>{type=tsel;nav("home")};
+const hdrop=$("hdrop"),hfile=$("hfile");
+hdrop.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();hfile.click()}};
+["dragover","dragenter"].forEach(ev=>$("s1").addEventListener(ev,e=>{e.preventDefault();hdrop.classList.add("over")}));
+["dragleave","drop"].forEach(ev=>$("s1").addEventListener(ev,e=>{e.preventDefault();hdrop.classList.remove("over")}));
+$("s1").addEventListener("drop",e=>{if(e.dataTransfer.files[0])startUpload(e.dataTransfer.files[0])});
+hfile.onchange=()=>{if(hfile.files[0])startUpload(hfile.files[0]);hfile.value=""};
+addEventListener("dragover",e=>e.preventDefault());addEventListener("drop",e=>e.preventDefault());
+document.querySelectorAll(".tsel button").forEach(b=>b.onclick=()=>{
+  tsel=b.dataset.k;type=tsel;
+  document.querySelectorAll(".tsel button").forEach(x=>{x.classList.toggle("on",x===b);x.setAttribute("aria-checked",x===b)});
 });
-$("back").onclick=()=>{$("s2").classList.remove("on");$("s1").classList.add("on");document.body.className=""};
 
 const drop=$("drop"),fi=$("file");
 drop.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();fi.click()}};
@@ -494,13 +601,15 @@ function show(d,raw){
 
 /* ---------- identity proof (kept only in this browser, via IndexedDB) ---------- */
 let ids=[],urls=[],mem=[],idPersist=true,vi=0,delTimer=null;
+let dbc=null;
 function idb(){
+  if(dbc)return Promise.resolve(dbc);
   return new Promise((res,rej)=>{
     try{
       if(!window.indexedDB)return rej(new Error("no indexedDB"));
       const r=indexedDB.open("ticket-analyser",1);
       r.onupgradeneeded=()=>r.result.createObjectStore("ids",{keyPath:"id"});
-      r.onsuccess=()=>res(r.result);
+      r.onsuccess=()=>{dbc=r.result;dbc.onversionchange=()=>{dbc.close();dbc=null};res(dbc)};
       r.onerror=()=>rej(r.error);
     }catch(e){rej(e)}
   });
@@ -544,40 +653,40 @@ function renderIds(){
   $("idlist").innerHTML=ids.map((r,i)=>{
     const u=URL.createObjectURL(r.blob);urls.push(u);
     const d=new Date(r.added).toLocaleDateString("en-IN",{day:"numeric",month:"short",year:"numeric"});
-    return `<div class="idc"><img src="${u}" alt="${esc(r.type)} preview"><div class="m"><b>${esc(r.type)}</b><small>Saved ${d}</small></div>
+    return `<div class="idc"><img src="${u}" alt="${esc(r.type)} preview"><div class="m"><b>${esc(r.label||r.type)}</b><small>${r.label?esc(r.type)+" · ":""}Saved ${d}</small></div>
       <button class="btn sm" data-v="${i}">View</button><button class="btn sm ghost" data-d="${i}">Delete</button></div>`;
   }).join("");
   $("idempty").hidden=ids.length>0;
-  $("idcount").textContent=ids.length?ids.length+" saved":"Not saved yet";
+  $("nI").textContent=ids.length;$("lI").textContent=ids.length===1?"ID card":"ID cards";$("idn").textContent=ids.length?ids.length+" saved":"";
 }
 async function refreshIds(){ids=await idAll();renderIds()}
 
-async function addId(file){
+async function addId(files){
   const err=$("iderr");err.hidden=true;$("idst").hidden=false;
-  try{
-    const blob=await toJpeg(file);
-    await idPut({id:Date.now()+"-"+Math.random().toString(36).slice(2,7),type:$("idtype").value,added:Date.now(),blob});
-    keepStorage();await refreshIds();
-    if(!idPersist){err.hidden=false;err.textContent="This browser would not let me store it, so it is kept only until you close this page."}
-  }catch(e){
-    err.hidden=false;
-    err.textContent=e&&e.name==="PasswordException"?"This PDF is password protected. Upload a screenshot or photo of the ID instead.":"Could not save that file ("+((e&&e.message)||e)+").";
-  }finally{$("idst").hidden=true}
+  const kind=$("idtype").value,label=$("idlabel").value.trim().slice(0,40);
+  let ok=0,bad="";
+  for(const file of files){
+    try{
+      const blob=await toJpeg(file);
+      await idPut({id:Date.now()+"-"+Math.random().toString(36).slice(2,7),type:kind,label,added:Date.now(),blob});ok++;
+    }catch(e){
+      bad=e&&e.name==="PasswordException"?"This PDF is password protected. Upload a screenshot or photo of the ID instead.":"Could not save that file ("+((e&&e.message)||e)+").";
+    }
+  }
+  if(ok){keepStorage();$("idlabel").value="";await refreshIds()}
+  if(bad){err.hidden=false;err.textContent=bad}
+  else if(ok&&!idPersist){err.hidden=false;err.textContent="This browser would not let me store it, so it is kept only until you close this page."}
+  $("idst").hidden=true;
 }
 
-function goIds(){
-  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("on"));
-  $("s3").classList.add("on");document.body.className="idp";
-}
-$("idstub").onclick=goIds;
-$("idback").onclick=()=>{$("s3").classList.remove("on");$("s1").classList.add("on");document.body.className=""};
+function goIds(){nav("ids")}
 
 const idd=$("iddrop"),idf=$("idfile");
 idd.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();idf.click()}};
 ["dragover","dragenter"].forEach(ev=>idd.addEventListener(ev,e=>{e.preventDefault();idd.classList.add("over")}));
 ["dragleave","drop"].forEach(ev=>idd.addEventListener(ev,e=>{e.preventDefault();idd.classList.remove("over")}));
-idd.addEventListener("drop",e=>{if(e.dataTransfer.files[0])addId(e.dataTransfer.files[0])});
-idf.onchange=()=>{if(idf.files[0])addId(idf.files[0]);idf.value=""};
+idd.addEventListener("drop",e=>{if(e.dataTransfer.files.length)addId([...e.dataTransfer.files])});
+idf.onchange=()=>{if(idf.files.length)addId([...idf.files]);idf.value=""};
 
 $("idlist").onclick=async e=>{
   const b=e.target.closest("button");if(!b)return;
@@ -654,26 +763,24 @@ function tkCard(t){
 function renderTickets(){
   if(typeof renderRems==="function")renderRems();
   const all=tkAll(),n=dir=>all.filter(t=>t.dir===dir).length;
-  $("tkcount").textContent=all.length?all.length+" saved ("+n("Onward")+" onward, "+n("Return")+" return)":"Not saved yet";
+  $("nT").textContent=all.length;$("lT").textContent=all.length===1?"ticket":"tickets";renderNext(all);
   $("tkitems").innerHTML=["Onward","Return"].map(dir=>{
     const l=all.filter(t=>t.dir===dir).sort((a,b)=>b.saved-a.saved);
     return `<h2 class="tkh">${dir} <small>${l.length?l.length+" saved":""}</small></h2>`+(l.length?l.map(tkCard).join(""):`<p class="note">No ${dir.toLowerCase()} ticket saved.</p>`);
   }).join("");
 }
-function openTickets(){
-  renderTickets();$("tkview").innerHTML="";$("tklist").hidden=false;goTo("s4","idp");
+function openTickets(pop){
+  renderTickets();$("tkview").innerHTML="";$("tklist").hidden=false;nav("tickets",pop!==true);
 }
-function openTicket(id){
+function openTicket(id,pop){
   const t=tkAll().find(x=>x.id===id);if(!t)return;
-  $("tklist").hidden=true;document.body.className=t.kind;
+  $("tklist").hidden=true;nav("tickets",false);document.body.className=t.kind;if(pop!==true){try{history.pushState({v:"tickets",d:id},"")}catch(e){}}
   $("tkview").innerHTML=`<button class="back" id="tkvback">&larr; All tickets</button>
     <h1>${esc(t.dir)} journey</h1><p class="sub">${t.kind==="train"?"Train":"Bus"} ticket saved on this device.</p>`+cardHTML(t.d,true)+actBtns(t.id)+
     `<p><button class="btn ghost" onclick="${ids.length?"openViewer(0)":"goIds()"}">${ids.length?"Show ID proof":"Save ID proof"}</button></p>`;
-  $("tkvback").onclick=openTickets;
+  $("tkvback").onclick=()=>{if(history.state&&history.state.d)history.back();else openTickets()};
   window.scrollTo(0,0);
 }
-$("tkstub").onclick=openTickets;
-$("tkback").onclick=()=>goTo("s1","");
 $("tkitems").onclick=e=>{
   const b=e.target.closest("button");if(!b)return;
   if(b.dataset.o)return openTicket(b.dataset.o);
@@ -693,7 +800,7 @@ async function intakeShared(){
     for(const k of ks)await c.delete(k);
     type="auto";document.body.className="";
     $("t2").textContent="Reading shared ticket";$("s2sub").textContent="Shared from another app. Working out whether it is a bus or train ticket.";
-    reset();document.querySelectorAll(".screen").forEach(x=>x.classList.remove("on"));$("s2").classList.add("on");
+    reset();nav("upload",false,true);
     run(new File([blob],name,{type:blob.type||rs.headers.get("content-type")||""}));
   }catch(e){}
 }
@@ -804,6 +911,122 @@ document.addEventListener("click",async e=>{
   b.dataset.armed="1";b.textContent="Tap again to delete";
   remDel=setTimeout(()=>{b.textContent="Delete";delete b.dataset.armed},3000);
 });
+/* ---------- app shell: tabs, back button, name, home, reset ---------- */
+const VIEWS={home:"s1",upload:"s2",ids:"s3",tickets:"s4",settings:"s5"};
+function nav(v,push,keep){
+  document.querySelectorAll(".screen").forEach(x=>x.classList.remove("on"));
+  $(VIEWS[v]).classList.add("on");
+  const tab=v==="upload"?"home":v;
+  document.querySelectorAll(".tabbar button").forEach(b=>{
+    const on=b.dataset.tab===tab;b.classList.toggle("on",on);
+    if(on)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current");
+  });
+  if(!keep)document.body.className="";
+  if(push!==false&&!(history.state&&history.state.v===v&&!history.state.d)){try{history.pushState({v},"")}catch(e){}}
+  window.scrollTo(0,0);
+}
+const tap=()=>{try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}};
+document.querySelectorAll(".tabbar button").forEach(b=>b.onclick=()=>{
+  tap();const t=b.dataset.tab;
+  if(t==="tickets")openTickets();
+  else{if(t==="home")type=tsel;nav(t)}
+});
+addEventListener("popstate",e=>{
+  closeModal();closeViewer();
+  const st=e.state||{v:"home"};
+  if(st.v==="tickets"){st.d?openTicket(st.d,true):openTickets(true)}else nav(st.v||"home",false);
+});
+$("avatar").onclick=()=>{tap();nav("settings")};
+$("cT").onclick=()=>{tap();openTickets()};
+$("cI").onclick=()=>{tap();nav("ids")};
+
+/* name */
+let uname="",nameMem="";
+const nameLoad=()=>{try{return localStorage.getItem("ta-name")||""}catch(e){return nameMem}};
+const nameSave=n=>{nameMem=n;try{localStorage.setItem("ta-name",n)}catch(e){}};
+function paintName(){
+  $("greet").textContent=uname?"Bon Voyage, "+uname:"Bon Voyage";
+  $("avatar").textContent=uname?[...uname][0].toUpperCase():"?";
+  $("sname").value=uname;
+}
+function showGate(){
+  $("gate").hidden=false;document.querySelector("main").inert=true;$("tabbar").inert=true;
+  $("gname").value="";$("gerr").hidden=true;setTimeout(()=>$("gname").focus(),60);
+}
+function hideGate(){$("gate").hidden=true;document.querySelector("main").inert=false;$("tabbar").inert=false}
+$("gok").onclick=()=>{
+  const v=$("gname").value.trim().replace(/\s+/g," ");
+  if(!v){$("gerr").hidden=false;$("gname").focus();return}
+  uname=v.slice(0,30);nameSave(uname);paintName();hideGate();
+};
+$("gname").onkeydown=e=>{if(e.key==="Enter")$("gok").click()};
+$("gname").oninput=()=>{$("gerr").hidden=true};
+$("snsave").onclick=()=>{
+  const v=$("sname").value.trim().replace(/\s+/g," "),m=$("snmsg");
+  if(!v){m.textContent="Enter a name.";return}
+  uname=v.slice(0,30);nameSave(uname);paintName();m.textContent="Saved";setTimeout(()=>{m.textContent=""},2000);
+};
+
+/* home: next-trip card */
+const ICON={
+  train:'<rect x="10" y="6" width="28" height="30" rx="6"/><path d="M10 22h28M17 42l5-6M31 42l-5-6"/><circle cx="17" cy="29" r="1.5"/><circle cx="31" cy="29" r="1.5"/>',
+  bus:'<rect x="8" y="7" width="32" height="30" rx="5"/><path d="M8 24h32M14 37v4M34 37v4"/><circle cx="16" cy="31" r="1.5"/><circle cx="32" cy="31" r="1.5"/>'
+};
+function renderNext(all){
+  const el=$("next");
+  if(!all.length){el.innerHTML='<div class="empty"><b>No trips yet</b>Drag a ticket below and it will show up here.</div>';return}
+  const now=Date.now(),w=all.map(t=>({t,j:journeyTime(t.d)}));
+  const up=w.filter(x=>x.j&&x.j>=now-36e5).sort((a,b)=>a.j-b.j)[0];
+  const pk=up||{t:all.slice().sort((a,b)=>b.saved-a.saved)[0]};
+  pk.j=pk.j||journeyTime(pk.t.d);
+  const t=pk.t,d=t.d,tr=t.kind==="train",p=d.pax[0]||{};
+  const dep=(tr?rv(d,"Departure"):rv(d,"Departure time")).split(" · ")[0];
+  const arr=tr?rv(d,"Arrival").split(" · ")[0]:"";
+  const dl=pk.j?", "+new Date(pk.j).toLocaleDateString("en-IN",{day:"numeric",month:"short"}).toUpperCase():"";
+  const parts=tr?[p.coach&&"Coach "+p.coach,p.seat&&"Seat "+p.seat,rv(d,"Train").split(" · ")[0]]:[p.seat&&"Seat "+p.seat,d.head[1]&&"PNR "+d.head[1]];
+  if(d.pax.length>1)parts.push("+"+(d.pax.length-1)+" more");
+  const foot=parts.filter(Boolean);
+  el.innerHTML=`<button class="rc ${t.kind}" data-o="${t.id}" aria-label="Open ${tr?"train":"bus"} ticket">
+    <div class="rt">${up?"NEXT TRIP":"LAST SAVED"}${esc(dl)}</div>
+    <div class="rr"><div class="st"><b>${esc(rv(d,"From")||"From?")}</b><small>${esc(dep)}</small></div>
+      <div class="mid"><svg viewBox="0 0 48 48" aria-hidden="true">${ICON[t.kind]}</svg><i></i></div>
+      <div class="st r"><b>${esc(rv(d,"To")||"To?")}</b><small>${esc(arr)}</small></div></div>
+    <div class="tear"></div>
+    <div class="rf">${(foot.length?foot:["PNR "+(d.head[1]||"not found")]).map(x=>"<span>"+esc(x)+"</span>").join("")}</div></button>`;
+}
+$("next").onclick=e=>{const b=e.target.closest("[data-o]");if(b){tap();openTicket(b.dataset.o)}};
+
+/* reset: delete everything this app stored */
+$("reset").onclick=()=>{
+  modal(`<h2>Delete all data?</h2><p class="note" style="margin:0">This removes everything Wallet has saved on this device: saved tickets, ID proofs, reminders and your name. It cannot be undone. An alarm already set in your Clock app has to be deleted there.</p>
+    <button class="btn danger" id="rgo">Delete everything</button><button class="btn ghost" data-close>Cancel</button><div class="note" id="rmsg" role="status" style="margin:0"></div>`);
+  $("rgo").onclick=resetAll;
+};
+async function resetAll(){
+  $("rmsg").textContent="Deleting…";
+  try{localStorage.clear()}catch(e){}
+  try{sessionStorage.clear()}catch(e){}
+  tkMem=[];remMem=[];mem=[];ids=[];tkPersist=true;idPersist=true;
+  try{
+    if(dbc){dbc.close();dbc=null}
+    if(window.indexedDB)await new Promise(res=>{const q=indexedDB.deleteDatabase("ticket-analyser");q.onsuccess=q.onerror=q.onblocked=()=>res()});
+  }catch(e){}
+  try{await caches.delete("ta-share")}catch(e){}
+  try{const reg=await navigator.serviceWorker.getRegistration();if(reg)(await reg.getNotifications({includeTriggered:true})).forEach(n=>n.close())}catch(e){}
+  uname="";nameMem="";
+  renderIds();renderTickets();paintName();
+  closeModal();nav("home");showGate();
+}
+
+function initApp(){
+  try{history.replaceState({v:"home"},"")}catch(e){}
+  uname=nameLoad();paintName();
+  if(!uname)showGate();
+  const tab=new URLSearchParams(location.search).get("tab");
+  if(tab==="tickets")openTickets();else if(tab==="ids")nav("ids");
+  if(tab){try{history.replaceState(history.state,"",location.pathname)}catch(e){}}
+}
+initApp();
 refreshIds();
 renderTickets();
 checkDue();intakeShared();
@@ -813,17 +1036,22 @@ function keepStorage(){try{navigator.storage&&navigator.storage.persist&&navigat
 let deferred=null;
 const standalone=()=>matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
 function showInstall(){
-  const el=$("inst");
-  if(standalone()){el.hidden=true;return}
+  const h=$("inst"),st=$("inst2"),sec=$("instsec");
+  if(standalone()){h.hidden=true;sec.hidden=true;return}
+  sec.hidden=false;
   if(deferred){
-    el.innerHTML='<button class="btn">Install Wallet on this phone</button>';el.hidden=false;
-    el.querySelector("button").onclick=async()=>{deferred.prompt();try{await deferred.userChoice}catch(e){}deferred=null;el.hidden=true};
-  }else if(/iPad|iPhone|iPod/.test(navigator.userAgent)){
-    el.innerHTML='<p class="note">To install Wallet on this iPhone: tap Share, then Add to Home Screen. Install it before saving tickets, because the installed app keeps its own saved items. Apple does not let web apps appear in the iPhone Share menu, so save the PDF or photo to Files or Photos first, then tap Upload ticket.</p>';el.hidden=false;
+    h.innerHTML='<button class="btn">Install Wallet on this phone</button>';h.hidden=false;
+    st.innerHTML='<button class="btn">Install Wallet</button>';
+    [h,st].forEach(el=>el.querySelector("button").onclick=async()=>{deferred.prompt();try{await deferred.userChoice}catch(e){}deferred=null;showInstall()});
+  }else{
+    h.hidden=true;
+    st.innerHTML=/iPad|iPhone|iPod/.test(navigator.userAgent)
+      ?'<p class="note" style="margin:0">To install Wallet on this iPhone: tap Share, then Add to Home Screen. Install it before saving tickets, because the installed app keeps its own saved items. Apple does not let web apps appear in the iPhone Share menu, so save the PDF or photo to Files or Photos first, then tap Upload ticket.</p>'
+      :'<p class="note" style="margin:0">Open this page in Chrome and choose Install app from the menu to add Wallet to your home screen. It then opens like a normal app and works offline.</p>';
   }
 }
 addEventListener("beforeinstallprompt",e=>{e.preventDefault();deferred=e;showInstall()});
-addEventListener("appinstalled",()=>{deferred=null;$("inst").hidden=true});
+addEventListener("appinstalled",()=>{deferred=null;showInstall()});
 /* ---------- share-menu checker ---------- */
 $("chk").addEventListener("toggle",async()=>{
   if(!$("chk").open)return;
