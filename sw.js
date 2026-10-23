@@ -1,7 +1,7 @@
 /* Wallet service worker: everything needed to read and save tickets and ID cards works without internet
    once the app has been opened online one time. */
-const V="wallet-v5",LIBC="wallet-libs-v1";
-const SHELL=["./","index.html","manifest.webmanifest","icon-192.png","icon-512.png","apple-touch-icon.png"];
+const V="wallet-v6",LIBC="wallet-libs-v1";
+const SHELL=["./","index.html","manifest.webmanifest","icon-192.png","icon-512.png","icon-maskable-512.png","apple-touch-icon.png"];
 /* Same SIMD test the scanner uses, so we keep the same engine file it will ask for */
 const SIMD=(()=>{try{return WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,0,0,1,5,1,96,0,1,123,3,2,1,0,10,10,1,8,0,65,0,253,15,253,98,11]))}catch(e){return false}})();
 const LIBS=[
@@ -50,17 +50,19 @@ self.addEventListener("fetch",e=>{
 });
 
 /* The app page: fresh from the network when it answers within 3 s, else the saved copy.
-   A weak signal no longer leaves the app stuck on a blank screen. */
+   A weak signal no longer leaves the app stuck on a blank screen, and a server error page
+   (404, 500…) never replaces the working saved copy. */
 function page(e,r){
   const key=new URL(r.url);key.search="";
   const net=fetch(r);
   e.waitUntil(net.then(res=>{if(!(res.ok&&res.type==="basic"))return;const cp=res.clone();return caches.open(V).then(c=>c.put(key.href,cp))}).catch(()=>{}));
+  const saved=async()=>{const c=await caches.open(V);return (await c.match(key.href))||(await c.match("./"))||(await c.match("index.html"))};
   e.respondWith((async()=>{
-    try{return await Promise.race([net,new Promise((_,j)=>setTimeout(()=>j(new Error("slow")),3000))])}
-    catch(x){
-      const c=await caches.open(V);
-      return (await c.match(key.href))||(await c.match("./"))||(await c.match("index.html"))||net;
+    try{
+      const res=await Promise.race([net,new Promise((_,j)=>setTimeout(()=>j(new Error("slow")),3000))]);
+      return res.status>=400?((await saved())||res):res;
     }
+    catch(x){return (await saved())||net}
   })());
 }
 /* Versioned library files never change: use the saved copy, download only when missing */
