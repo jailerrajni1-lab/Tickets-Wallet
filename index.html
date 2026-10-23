@@ -266,6 +266,7 @@ main{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
     <button class="avatar" id="avatar" aria-label="Open settings">?</button>
   </header>
   <div class="offbar" id="offbar" role="status" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 2l20 20M8.5 16.5a5 5 0 0 1 7 0M5 13a10 10 0 0 1 5.2-2.8M19 13a10 10 0 0 0-2-1.5M2 8.8a15 15 0 0 1 4.2-2.6M22 8.8A15 15 0 0 0 11 5"/><circle cx="12" cy="20" r="1"/></svg><span></span></div>
+  <div class="offbar" id="pend" hidden><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8h18v3a2 2 0 0 0 0 4v3H3v-3a2 2 0 0 0 0-4z"/></svg><span style="flex:1">A shared ticket is waiting to be read.</span><button class="btn sm" id="pendgo">Read it</button></div>
   <div id="next"></div>
   <div class="dzh"><span>Add a ticket</span><button class="idpill"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6 16c.5-2 2-3 3-3s2.5 1 3 3M14 10h4M14 14h4"/></svg><span>Save ID proof</span></button></div>
   <label class="dz" id="hdrop" tabindex="0">
@@ -399,8 +400,8 @@ const drop=$("drop"),fi=$("file");
 drop.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();fi.click()}};
 ["dragover","dragenter"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over")}));
 ["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("over")}));
-drop.addEventListener("drop",e=>{const f=e.dataTransfer.files[0];if(f)askWho(()=>run(f))});
-fi.onchange=()=>{const f=fi.files[0];fi.value="";if(f)askWho(()=>run(f))};
+drop.addEventListener("drop",e=>{const f=e.dataTransfer.files[0];if(f)startUpload(f)});
+fi.onchange=()=>{const f=fi.files[0];fi.value="";if(f)startUpload(f)};
 
 function reset(){$("out").innerHTML="";$("err").hidden=true;$("status").hidden=true;$("bar").style.width="0%"}
 /* The main line always says what is being looked for. Scanner start-up hints show underneath. */
@@ -468,7 +469,7 @@ async function run(file){
 function askType(text){
   fail("I could not tell whether this is a KSRTC bus ticket or an IRCTC train ticket. Choose one:");
   $("err").insertAdjacentHTML("beforeend",' <button class="btn sm" data-pt="bus">Bus</button> <button class="btn sm" data-pt="train">Train</button>');
-  $("err").querySelectorAll("[data-pt]").forEach(b=>b.onclick=()=>{type=b.dataset.pt;document.body.className=type;$("err").hidden=true;show(type==="bus"?parseBus(text):parseTrain(text),text)});
+  $("err").querySelectorAll("[data-pt]").forEach(b=>b.onclick=()=>{type=b.dataset.pt;document.body.className=type;$("t2").textContent=type==="bus"?"KSRTC bus ticket":"IRCTC train ticket";$("err").hidden=true;show(type==="bus"?parseBus(text):parseTrain(text),text)});
 }
 /* OCR: one warm worker per language, reused between scans.
    Same engine and settings as Tesseract.recognize(), which built and threw away a worker on every call. */
@@ -720,8 +721,11 @@ function parseTrainApp(t){
   const hm=(h,m)=>h.padStart(2,"0")+":"+m;
   const st=[...t.matchAll(/([A-Za-z][A-Za-z.&' \-]{2,38}?)\s*\(([A-Z]{2,5})\)/g)].map(m=>titleCase(m[1])+" ("+m[2]+")");
   const days=[...t.matchAll(/(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)[a-z]*,?\s*(\d{1,2})\s+([A-Za-z]{3})/gi)];
-  const yr=(t.match(/\b\d{1,2}\s+[A-Za-z]{3,9}\s+(20\d\d)\b/)||[])[1]||new Date().getFullYear();
-  const dt=d=>d?d[1]+" "+titleCase(d[2])+" "+yr:"";
+  /* dates without a year ("Sun, 3 Jan"): this year, or next year if that date is already well past */
+  const now=new Date(),ymd=(d,y)=>new Date(y,MONI[d[2].slice(0,3).toLowerCase()],+d[1]);
+  let yr=+((t.match(/\b\d{1,2}\s+[A-Za-z]{3,9}\s+(20\d\d)\b/)||[])[1]||0);
+  if(!yr){yr=now.getFullYear();if(days[0]&&ymd(days[0],yr)<now-60*864e5)yr++}
+  const dt=(d,ref)=>{if(!d)return"";let y=yr;if(ref&&ymd(d,y)<ymd(ref,yr))y++;return d[1]+" "+titleCase(d[2])+" "+y};
   const nm=t.match(/\b([A-Z][A-Z .&'\-]{2,40}?)\s*\((\d{5})\)/);
   const pnr=(t.match(/PNR\s*:?\s*(\d{10})\b/i)||[])[1]||"";
   const sec=t.split(/Passenger\s*Information/i)[1]||"",names=[],pax=[];
@@ -732,7 +736,7 @@ function parseTrainApp(t){
   pax.forEach((p,i)=>p.name=names[i]||"");
   if(!pax.length)pax.push({name:"",coach:"",seat:"",type:""});
   return{head:["PNR",pnr],rows:[["Train",nm?nm[2]+" · "+clean(nm[1]):""],["From",st[0]||""],["To",st[1]||""],
-    ["Departure",tm&&days[0]?hm(tm[1],tm[2])+" · "+dt(days[0]):""],["Arrival",tm&&days[0]?hm(tm[3],tm[4])+" · "+dt(days[1]||days[0]):""]],pax,train:true};
+    ["Departure",tm&&days[0]?hm(tm[1],tm[2])+" · "+dt(days[0]):""],["Arrival",tm&&days[0]?hm(tm[3],tm[4])+" · "+dt(days[1]||days[0],days[0]):""]],pax,train:true};
 }
 function parseTrain(t){
   const app=parseTrainApp(t);if(app)return app;
@@ -825,14 +829,14 @@ function show(d,raw){
 /* Same PNR already saved? Say so before the user saves a second copy */
 function dupHint(){
   const el=$("tkmsg"),pnr=$("h")&&$("h").value.trim();if(!el||!pnr)return;
-  const dir=document.querySelector(".seg button.on").dataset.dir,kind=type==="train"?"train":"bus";
+  const dir=document.querySelector(".seg button.on").dataset.dir,kind=lastRead&&lastRead.d.train?"train":"bus";
   const same=tkAll().filter(t=>t.d.head[1]===pnr&&t.kind===kind);
   el.textContent=same.some(t=>t.dir===dir)?"Already saved as "+dir+". Saving again replaces that copy."
     :same.length?"This PNR is already saved as "+same[0].dir+". Saving it as "+dir+" keeps a second copy.":"";
 }
 
 /* ---------- reading problems: a small log kept on this device, to find and fix parser gaps ---------- */
-const APPV="wallet-v5";
+const APPV="wallet-v6";
 const logAll=()=>{try{return JSON.parse(localStorage.getItem("ta-log")||"[]")}catch(e){return[]}};
 function logIssue(code,msg,extra){
   try{const a=logAll();a.push({at:Date.now(),code,msg:String(msg).slice(0,200),extra:extra||"",file:lastMeta});localStorage.setItem("ta-log",JSON.stringify(a.slice(-30)))}catch(e){}
@@ -905,17 +909,31 @@ const blobOf=c=>new Promise((res,rej)=>c.toBlob(b=>b?res(b):rej(new Error("Could
 async function toJpeg(file){
   const c=document.createElement("canvas"),x=c.getContext("2d");
   if(file.type==="application/pdf"||/\.pdf$/i.test(file.name)){
-    const pdf=await loadPdf(file),pg=await pdf.getPage(1),vp=pg.getViewport({scale:2});
-    c.width=vp.width;c.height=vp.height;x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);
-    await pg.render({canvasContext:x,viewport:vp}).promise;
-    return blobOf(c);
+    const pdf=await loadPdf(file);
+    try{
+      const pg=await pdf.getPage(1),vp=pg.getViewport({scale:2});
+      c.width=vp.width;c.height=vp.height;x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);
+      await pg.render({canvasContext:x,viewport:vp}).promise;
+      return await blobOf(c);
+    }finally{try{pdf.destroy()}catch(e){}} /* free the PDF's memory */
   }
   if(!file.type.startsWith("image/"))throw new Error("Please choose an image (PNG, JPG) or a PDF.");
-  const bmp=await createImageBitmap(file,{imageOrientation:"from-image"}).catch(()=>createImageBitmap(file));
-  const k=Math.min(1,1800/Math.max(bmp.width,bmp.height));
-  c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);
-  x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(bmp,0,0,c.width,c.height);
+  const img=await decodeImage(file),w=img.width||img.naturalWidth,h=img.height||img.naturalHeight;
+  const k=Math.min(1,1800/Math.max(w,h));
+  c.width=Math.round(w*k);c.height=Math.round(h*k);
+  x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(img,0,0,c.width,c.height);
+  try{img.close&&img.close()}catch(e){}
   return blobOf(c);
+}
+/* createImageBitmap is missing on iPhones before iOS 15: fall back to a normal image */
+async function decodeImage(file){
+  if(window.createImageBitmap){
+    try{return await createImageBitmap(file,{imageOrientation:"from-image"})}catch(e){}
+    try{return await createImageBitmap(file)}catch(e){}
+  }
+  const u=URL.createObjectURL(file);
+  try{return await new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>rej(new Error("image"));im.src=u})}
+  finally{setTimeout(()=>URL.revokeObjectURL(u),1000)}
 }
 
 const ID_TYPES=["Aadhaar","Driving licence","Voter ID","Passport","PAN card","Other"];
@@ -943,7 +961,10 @@ async function addId(files){
       const blob=await toJpeg(file);
       await idPut({id:Date.now()+"-"+Math.random().toString(36).slice(2,7),type:kind,label,added:Date.now(),blob});ok++;
     }catch(e){
-      bad=e&&e.name==="PasswordException"?"This PDF is password protected. Upload a screenshot or photo of the ID instead.":"Could not save that file ("+((e&&e.message)||e)+").";
+      bad=e&&e.name==="PasswordException"?"This PDF is password protected. Upload a screenshot or photo of the ID instead."
+        :e&&e.code==="lib"?"Adding a PDF needs the reader, which isn't on this phone yet. Connect to the internet once, or add a photo instead."
+        :/choose an image/.test(e&&e.message)?e.message
+        :"That file couldn't be opened. Take a screenshot (PNG or JPG) of the ID and add that.";
     }
   }
   if(ok){keepStorage();$("idlabel").value="";await refreshIds()}
@@ -988,7 +1009,7 @@ function drawViewer(){
 function openViewer(i,manage){
   if(!ids.length)return;
   vi=i;drawViewer();const d=$("vdel");d.hidden=!manage;d.textContent="Delete";delete d.dataset.armed;
-  $("viewer").classList.add("on");$("vclose").focus();
+  $("viewer").classList.add("on");ovPush();$("vclose").focus();
 }
 $("vdel").onclick=async()=>{
   const b=$("vdel");
@@ -998,12 +1019,12 @@ $("vdel").onclick=async()=>{
   if(!ids.length)return closeViewer();
   vi=Math.min(vi,ids.length-1);drawViewer();
 };
-const closeViewer=()=>$("viewer").classList.remove("on");
-$("vclose").onclick=closeViewer;
+$("vclose").onclick=()=>closeViewer();
 $("vprev").onclick=()=>{vi=(vi-1+ids.length)%ids.length;drawViewer()};
 $("vnext").onclick=()=>{vi=(vi+1)%ids.length;drawViewer()};
 $("viewer").onclick=e=>{if(e.target.id==="viewer")closeViewer()};
 document.addEventListener("keydown",e=>{
+  if(e.key==="Escape"&&$("modal").classList.contains("on"))return closeModal();
   if(!$("viewer").classList.contains("on"))return;
   if(e.key==="Escape")closeViewer();
   if(e.key==="ArrowLeft"&&ids.length>1)$("vprev").click();
@@ -1011,7 +1032,7 @@ document.addEventListener("keydown",e=>{
 });
 /* ---------- whose ticket is it? asked when a ticket is added to ones already saved ---------- */
 let curWho=""; /* "" means for me, otherwise the other person's name */
-function askWho(go,change){
+function askWho(go,change,cancel){
   if(!change&&!tkAll().length){curWho="";return go()}
   const pre=change&&curWho,names=[...new Set(tkAll().map(t=>t.who).filter(Boolean))].slice(0,6);
   modal(`<h2>Who is this ticket for?</h2>
@@ -1023,7 +1044,7 @@ function askWho(go,change){
       <input id="whoname" type="text" maxlength="30" autocomplete="off" placeholder="Like Hari" value="${esc(pre||"")}">
       ${names.length?`<div class="chips2" id="whosug" aria-label="Saved names">${names.map(n=>`<button data-n="${esc(n)}">${esc(n)}</button>`).join("")}</div>`:""}
       <p class="note" id="whoerr" role="alert" style="margin:0;color:#b42318" hidden>Enter their name.</p></div>
-    <button class="btn" id="whogo">${change?"Save":"Continue"}</button><button class="btn ghost" data-close>Cancel</button>`);
+    <button class="btn" id="whogo">${change?"Save":"Continue"}</button><button class="btn ghost" data-close>Cancel</button>`,cancel);
   let who=pre?"other":"me";
   const box=$("whobox"),inp=$("whoname");
   $("sheet").querySelectorAll("[data-w]").forEach(b=>b.onclick=()=>{
@@ -1038,7 +1059,7 @@ function askWho(go,change){
   $("whogo").onclick=()=>{
     const n=inp.value.trim().replace(/\s+/g," ");
     if(who==="other"&&!n){$("whoerr").hidden=false;inp.focus();return}
-    curWho=who==="other"?n.slice(0,30):"";closeModal();go();
+    curWho=who==="other"?n.slice(0,30):"";onDismiss=null;closeModal().then(go);
   };
 }
 function paintWho(){
@@ -1062,7 +1083,7 @@ function goTo(id,cls){
   $(id).classList.add("on");document.body.className=cls||"";
 }
 function readCard(){
-  const o=$("out"),tr=type==="train";
+  const o=$("out"),tr=!!(lastRead&&lastRead.d.train);
   const rows=[...o.querySelectorAll(".row")].map(r=>[r.querySelector("label").textContent,r.querySelector("input").value.trim()]);
   const pax=[...o.querySelectorAll(".p")].map(p=>{
     const g=c=>(p.querySelector(c)||{value:""}).value.trim();
@@ -1076,7 +1097,8 @@ function saveTicket(){
   const rec={id:i>=0?all[i].id:Date.now()+"-"+Math.random().toString(36).slice(2,7),dir,kind,saved:Date.now(),who:curWho,d};
   if(i>=0)all[i]=rec;else all.push(rec);
   tkStore(all);keepStorage();renderTickets();
-  $("tkmsg").innerHTML=(i>=0?"Updated the saved ":"Saved as ")+esc(dir)+" ticket"+(curWho?" for "+esc(curWho):"")+"."+(tkPersist?"":" This browser would not let me store it, so it is kept only until you close this page.")+" <button class=\"btn sm ghost\" onclick=\"openTickets()\">View my tickets</button>";
+  $("tkmsg").innerHTML=(i>=0?"Updated the saved ":"Saved as ")+esc(dir)+" ticket"+(curWho?" for "+esc(curWho):"")+"."+(tkPersist?"":" This browser would not let me store it, so it is kept only until you close this page.")+" <button class=\"btn sm ghost\" onclick=\"openTickets()\">View my tickets</button>"
+    +(iosTab()?'<span class="warn" style="display:block;margin-top:10px">Add Wallet to your Home Screen so '+(iosBrowser()==="Safari"?"Safari":"this browser")+' doesn\'t delete it.</span>':"");
 }
 const rv=(d,l)=>((d.rows.find(r=>r[0]===l)||["",""])[1]||"");
 /* "MGR CHENNAI CTL" -> "MGR Chennai CTL": keep short consonant-only codes in capitals */
@@ -1141,22 +1163,30 @@ $("tkitems").onclick=e=>{
   if(b.dataset.up!=null)$("hfile").click();
 };
 /* ---------- shared-in files (Android share sheet -> service worker -> here) ---------- */
+let sharedFile=null;
 async function intakeShared(){
   if(!/[?&]shared=/.test(location.search))return;
-  history.replaceState(null,"",location.pathname);
+  try{history.replaceState(history.state,"",location.pathname)}catch(e){}
   try{
     const c=await caches.open("ta-share"),ks=await c.keys();if(!ks.length)return;
     const rs=await c.match(ks[0]),blob=await rs.blob(),name=decodeURIComponent(rs.headers.get("x-name")||"ticket");
     for(const k of ks)await c.delete(k);
-    const f=new File([blob],name,{type:blob.type||rs.headers.get("content-type")||""});
-    askWho(()=>{
-      type="auto";document.body.className="";
-      $("t2").textContent="Reading shared ticket";$("s2sub").textContent="Shared from another app. Working out whether it is a bus or train ticket.";
-      reset();nav("upload",false,true);
-      run(f);
-    });
+    sharedFile=new File([blob],name,{type:blob.type||rs.headers.get("content-type")||""});
+    readShared();
   }catch(e){}
 }
+/* if "Who is this ticket for?" is cancelled, the shared ticket waits on Home instead of being lost */
+function readShared(){
+  const f=sharedFile;if(!f)return;
+  askWho(()=>{
+    sharedFile=null;paintPending();
+    type="auto";document.body.className="";
+    $("t2").textContent="Reading shared ticket";$("s2sub").textContent="Shared from another app. Working out whether it is a bus or train ticket.";
+    reset();nav("upload",true,true);
+    run(f);
+  },false,paintPending);
+}
+function paintPending(){$("pend").hidden=!sharedFile}
 /* ---------- journey time (used to pick the next trip on Home) ---------- */
 const MONI={jan:0,feb:1,mar:2,apr:3,may:4,jun:5,jul:6,aug:7,sep:8,oct:9,nov:10,dec:11};
 function journeyTime(d){
@@ -1166,8 +1196,25 @@ function journeyTime(d){
   const mo=/\d/.test(dm[2])?+dm[2]-1:MONI[dm[2].slice(0,3).toLowerCase()];let y=+dm[3];if(y<100)y+=2000;
   return mo==null||isNaN(mo)?null:new Date(y,mo,+dm[1],+tm[1],+tm[2]).getTime();
 }
-const modal=h=>{$("sheet").innerHTML=h;$("modal").classList.add("on")};
-const closeModal=()=>$("modal").classList.remove("on");
+/* Pop-ups (ID viewer, sheets) add one Back step, so the phone's Back button closes the pop-up
+   instead of leaving the screen or closing the app. */
+let ovWait=null,onDismiss=null;
+const ovOpen=()=>$("modal").classList.contains("on")||$("viewer").classList.contains("on");
+function ovPush(){if(!(history.state&&history.state.ov)){try{history.pushState(Object.assign({},history.state,{ov:1}),"")}catch(e){}}}
+function hideOverlays(){
+  $("viewer").classList.remove("on");
+  const wasModal=$("modal").classList.contains("on");$("modal").classList.remove("on");
+  const f=onDismiss;onDismiss=null;if(wasModal&&f)f(); /* sheet closed without choosing */
+}
+/* Close from a button: also step back past the pop-up's history entry. Resolves once that is done,
+   so a screen change right after it isn't undone by the step back. */
+function closeOverlays(){
+  hideOverlays();
+  if(!(history.state&&history.state.ov))return Promise.resolve();
+  return new Promise(res=>{const t=setTimeout(()=>{ovWait=null;res()},500);ovWait=()=>{clearTimeout(t);ovWait=null;res()};history.back()});
+}
+const modal=(h,dismiss)=>{$("sheet").innerHTML=h;onDismiss=dismiss||null;$("modal").classList.add("on");ovPush()};
+const closeModal=closeOverlays,closeViewer=closeOverlays;
 $("modal").onclick=e=>{if(e.target.id==="modal"||(e.target.closest&&e.target.closest("[data-close]")))closeModal()};
 /* Reminders and alarms were removed. Clear what older versions stored. */
 function dropOldReminders(){
@@ -1195,8 +1242,10 @@ document.querySelectorAll(".tabbar button").forEach(b=>b.onclick=()=>{
   else{if(t==="home")type=tsel;nav(t)}
 });
 addEventListener("popstate",e=>{
-  closeModal();closeViewer();
+  if(ovWait)return ovWait();                   /* our own step back after a pop-up closed */
+  if(ovOpen())return hideOverlays();           /* phone Back closes the pop-up only */
   const st=e.state||{v:"home"};
+  if(st.v==="upload"){nav("upload",false,true);document.body.className=busy?(type==="auto"?"":type):lastRead?(lastRead.d.train?"train":"bus"):"";return}
   if(st.v==="tickets"){st.d?openTicket(st.d,true):openTickets(true)}else nav(st.v||"home",false);
 });
 $("avatar").onclick=()=>{tap();nav("settings")};
@@ -1313,7 +1362,7 @@ async function resetAll(){
   try{const reg=await navigator.serviceWorker.getRegistration();if(reg)(await reg.getNotifications({includeTriggered:true})).forEach(n=>n.close())}catch(e){}
   uname="";nameMem="";
   renderIds();renderTickets();paintName();renderLog();
-  closeModal();nav("home");showGate();
+  await closeModal();nav("home");showGate();
 }
 
 function initApp(){
@@ -1328,6 +1377,7 @@ initApp();
 refreshIds();
 renderTickets();
 dropOldReminders();renderLog();intakeShared();
+$("pendgo").onclick=readShared;
 
 /* ---------- offline: keep the readers on this phone so tickets and IDs can be added without internet ---------- */
 let offP=null,offFailed=false;
@@ -1379,6 +1429,9 @@ if(navigator.serviceWorker)navigator.serviceWorker.addEventListener("controllerc
 /* ---------- install as an app ---------- */
 function keepStorage(){try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}}
 let deferred=null;
+/* iPhone/iPad browsers (not the Home Screen app) may delete saved data after about a week without a visit */
+const iosTab=()=>!standalone()&&detectBrowser().endsWith("_ios");
+const iosBrowser=()=>detectBrowser()==="safari_ios"?"Safari":"This browser";
 const standalone=()=>["standalone","fullscreen","minimal-ui"].some(m=>matchMedia("(display-mode: "+m+")").matches)||navigator.standalone===true;
 
 /* Which browser is this? Decides which install steps to show. Users can switch if it guesses wrong. */
@@ -1450,7 +1503,7 @@ function openHowSheet(){
 function showInstall(){
   const h=$("inst"),st=$("inst2"),sec=$("instsec");
   if(standalone()){h.hidden=true;sec.hidden=true;return}
-  const b=instPick||detectBrowser(),inapp=b==="inapp",done=installedHere()&&!inapp;
+  const b=instPick||detectBrowser(),inapp=b==="inapp",done=installedHere()&&!inapp,ios=!inapp&&iosTab();
   sec.hidden=false;
   st.innerHTML=done?'<p class="instnote">Wallet is installed. Open it from your home screen or app list.</p>'
     :(deferred&&!inapp?'<p style="margin:0 0 12px"><button class="btn" data-inst="go">Install Wallet</button></p><p class="instnote" style="margin-bottom:10px">Or use the browser menu:</p>':"")
@@ -1458,8 +1511,10 @@ function showInstall(){
   let later=0;try{later=+localStorage.getItem("ta-inst-later")||0}catch(e){}
   h.hidden=done||Date.now()<later;
   h.innerHTML=`<div class="instcard">${LOGO}<div style="flex:1;min-width:0">
-    <b>${inapp?"Open Wallet in your browser":"Install Wallet"}</b>
-    <p>${inapp?"You opened Wallet inside another app. Open it in your browser to install it and keep your tickets.":"Opens like an app from your home screen and works without internet."}</p>
+    <b>${inapp?"Open Wallet in your browser":ios?"Keep your tickets safe":"Install Wallet"}</b>
+    <p>${inapp?"You opened Wallet inside another app. Open it in your browser to install it and keep your tickets."
+      :ios?iosBrowser()+" may delete them if you don't open Wallet for a week. Add Wallet to your Home Screen."
+      :"Opens like an app from your home screen and works without internet."}</p>
     <div class="acts2">${deferred&&!inapp?'<button class="btn sm" data-inst="go">Install</button>':'<button class="btn sm" data-inst="how">Show me how</button>'}
     ${inapp?'<button class="btn sm ghost" data-inst="copy">Copy link</button>':'<button class="btn sm ghost" data-inst="later">Not now</button>'}</div>
     <div class="instnote" data-copymsg role="status"></div></div></div>`;
