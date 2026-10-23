@@ -39,6 +39,8 @@ p.sub{color:var(--mute);margin:0 0 26px;line-height:1.5;display:block}
 .drop b{display:block;font-size:1.2rem;margin-bottom:4px}.drop span{color:var(--mute);font-size:.92rem}
 .drop input{display:none}
 .status{margin:18px 0;color:var(--mute)}
+.status #stxt{display:block;font-weight:800;font-size:1.05rem;color:var(--ink)}
+.status small{display:block;margin-top:3px;font-size:.88rem}
 .bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:8px}.bar i{display:block;height:100%;width:0;background:var(--acc);transition:width .2s}
 .err{color:#b42318;margin:14px 0;line-height:1.45}
 .ticket{background:var(--card);border-radius:14px;overflow:hidden;margin-top:18px}
@@ -292,7 +294,7 @@ main{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
     <b>Upload ticket</b><span>Screenshot, photo or PDF. Drag it here or tap to choose.</span>
     <input type="file" id="file" accept="image/*,application/pdf">
   </label>
-  <div class="status" id="status" hidden><span id="stxt"></span><div class="bar"><i id="bar"></i></div></div>
+  <div class="status" id="status" role="status" hidden><span id="stxt"></span><small id="stxt2" hidden></small><div class="bar"><i id="bar"></i></div></div>
   <div class="err" id="err" hidden></div>
   <div id="out"></div>
 </section>
@@ -373,7 +375,8 @@ const LIBS={pdf:"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.
 const libErr=()=>Object.assign(new Error("the reader is not on this phone yet. Connect to the internet once, or add a photo instead"),{code:"lib"});
 let type="auto",tsel="auto";
 
-function startUpload(file){
+function startUpload(file){askWho(()=>beginUpload(file))}
+function beginUpload(file){
   type=tsel;document.body.className=type==="auto"?"":type;
   $("t2").textContent=type==="auto"?"Upload your ticket":type==="bus"?"Upload your bus ticket":"Upload your train ticket";
   $("s2sub").textContent=type==="auto"?"KSRTC bus or IRCTC train. I will work out which it is, then read it.":type==="bus"?"KSRTC ticket. I will pick out PNR, seat number, route and date.":"IRCTC ticket. I will pick out PNR, train, route, departure and arrival, and each passenger's coach, seat number and seat type.";
@@ -396,11 +399,17 @@ const drop=$("drop"),fi=$("file");
 drop.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();fi.click()}};
 ["dragover","dragenter"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add("over")}));
 ["dragleave","drop"].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove("over")}));
-drop.addEventListener("drop",e=>{if(e.dataTransfer.files[0])run(e.dataTransfer.files[0])});
-fi.onchange=()=>{if(fi.files[0])run(fi.files[0]);fi.value=""};
+drop.addEventListener("drop",e=>{const f=e.dataTransfer.files[0];if(f)askWho(()=>run(f))});
+fi.onchange=()=>{const f=fi.files[0];fi.value="";if(f)askWho(()=>run(f))};
 
 function reset(){$("out").innerHTML="";$("err").hidden=true;$("status").hidden=true;$("bar").style.width="0%"}
-function prog(t,p){$("status").hidden=false;$("stxt").textContent=t;if(p!=null)$("bar").style.width=Math.round(p*100)+"%"}
+/* The main line always says what is being looked for. Scanner start-up hints show underneath. */
+const findMsg=()=>tsel==="bus"?"Finding your PNR and Seat…":"Finding your PNR, Seat, Coach…";
+function prog(t,p){
+  $("status").hidden=false;$("stxt").textContent=findMsg();
+  const hint=(t===MSG.warm||t===MSG.first||t===MSG.next)?t:"",s2=$("stxt2");s2.textContent=hint;s2.hidden=!hint;
+  if(p!=null)$("bar").style.width=Math.round(p*100)+"%";
+}
 function fail(m){$("status").hidden=true;$("err").hidden=false;$("err").textContent=m}
 
 /* Progress messages: say what is happening, never "page 1 / page 2" */
@@ -428,7 +437,7 @@ function errMsg(e){
 async function run(file){
   const my=++runId,t0=Date.now();
   if(busy)ocrStop(); /* a new file replaces the one still being read */
-  busy=my;reset();
+  busy=my;reset();prog(MSG.open,.02);
   const isPdf=file.type==="application/pdf"||/\.pdf$/i.test(file.name||"");
   lastMeta={type:file.type||"(none)",kb:Math.round((file.size||0)/1024),pdf:isPdf,pages:0,scanned:false,ms:0};
   const stop=(code,m,extra)=>{if(my!==runId)return;lastMeta.ms=Date.now()-t0;fail(m);logIssue(code,m,extra)};
@@ -794,7 +803,7 @@ function show(d,raw){
   const sv=tkAll(),hasO=sv.some(t=>t.dir==="Onward"),hasR=sv.some(t=>t.dir==="Return");
   const def=hasO&&!hasR?"Return":"Onward";
   const seg=x=>`<button role="radio" aria-checked="${x===def}" class="${x===def?"on":""}" data-dir="${x}">${x}</button>`;
-  const save=hasPnr?`<div class="savebox"><div class="sl" id="dirl">Save this ticket as</div>
+  const save=hasPnr?`<div class="savebox"><div class="msg" id="whol"></div><div class="sl" id="dirl">Save this ticket as</div>
       <div class="seg" role="radiogroup" aria-labelledby="dirl">${seg("Onward")}${seg("Return")}</div>
       <button class="btn" id="tksave">Save ticket</button>
       <div class="msg" id="tkmsg" role="status"></div></div>`
@@ -811,7 +820,7 @@ function show(d,raw){
   $("rep").onclick=copyReport;
   if(!hasPnr)return;
   document.querySelectorAll(".seg button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".seg button").forEach(x=>{x.classList.toggle("on",x===b);x.setAttribute("aria-checked",x===b)});dupHint()});
-  $("tksave").onclick=saveTicket;dupHint();
+  $("tksave").onclick=saveTicket;dupHint();paintWho();
 }
 /* Same PNR already saved? Say so before the user saves a second copy */
 function dupHint(){
@@ -823,7 +832,7 @@ function dupHint(){
 }
 
 /* ---------- reading problems: a small log kept on this device, to find and fix parser gaps ---------- */
-const APPV="wallet-v4";
+const APPV="wallet-v5";
 const logAll=()=>{try{return JSON.parse(localStorage.getItem("ta-log")||"[]")}catch(e){return[]}};
 function logIssue(code,msg,extra){
   try{const a=logAll();a.push({at:Date.now(),code,msg:String(msg).slice(0,200),extra:extra||"",file:lastMeta});localStorage.setItem("ta-log",JSON.stringify(a.slice(-30)))}catch(e){}
@@ -953,7 +962,7 @@ function askIdType(files){
     <div class="chips2" role="radiogroup" aria-label="ID type">${ID_TYPES.map(t=>`<button role="radio" aria-checked="${t===def}" class="${t===def?"on":""}" data-t="${esc(t)}">${esc(t)}</button>`).join("")}</div>
     <input type="hidden" id="idtype" value="${esc(def)}">
     <label class="sl" for="idlabel">Label (optional)</label>
-    <input id="idlabel" type="text" maxlength="40" placeholder="Like Priya Aadhaar">
+    <input id="idlabel" type="text" maxlength="40" placeholder="Like Hari Aadhaar">
     <button class="btn" id="idgo">${files.length>1?"Save "+files.length+" files":"Save ID"}</button>
     <button class="btn ghost" data-close>Cancel</button>`);
   $("sheet").querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{
@@ -1000,6 +1009,44 @@ document.addEventListener("keydown",e=>{
   if(e.key==="ArrowLeft"&&ids.length>1)$("vprev").click();
   if(e.key==="ArrowRight"&&ids.length>1)$("vnext").click();
 });
+/* ---------- whose ticket is it? asked when a ticket is added to ones already saved ---------- */
+let curWho=""; /* "" means for me, otherwise the other person's name */
+function askWho(go,change){
+  if(!change&&!tkAll().length){curWho="";return go()}
+  const pre=change&&curWho,names=[...new Set(tkAll().map(t=>t.who).filter(Boolean))].slice(0,6);
+  modal(`<h2>Who is this ticket for?</h2>
+    <div class="chips2" role="radiogroup" aria-label="Ticket for">
+      <button role="radio" aria-checked="${!pre}" class="${pre?"":"on"}" data-w="me">For me</button>
+      <button role="radio" aria-checked="${!!pre}" class="${pre?"on":""}" data-w="other">Someone else</button></div>
+    <div id="whobox" ${pre?"":"hidden"} style="display:${pre?"flex":"none"};flex-direction:column;gap:10px">
+      <label class="sl" for="whoname">Their name</label>
+      <input id="whoname" type="text" maxlength="30" autocomplete="off" placeholder="Like Hari" value="${esc(pre||"")}">
+      ${names.length?`<div class="chips2" id="whosug" aria-label="Saved names">${names.map(n=>`<button data-n="${esc(n)}">${esc(n)}</button>`).join("")}</div>`:""}
+      <p class="note" id="whoerr" role="alert" style="margin:0;color:#b42318" hidden>Enter their name.</p></div>
+    <button class="btn" id="whogo">${change?"Save":"Continue"}</button><button class="btn ghost" data-close>Cancel</button>`);
+  let who=pre?"other":"me";
+  const box=$("whobox"),inp=$("whoname");
+  $("sheet").querySelectorAll("[data-w]").forEach(b=>b.onclick=()=>{
+    who=b.dataset.w;
+    $("sheet").querySelectorAll("[data-w]").forEach(x=>{x.classList.toggle("on",x===b);x.setAttribute("aria-checked",x===b)});
+    box.hidden=who!=="other";box.style.display=who==="other"?"flex":"none";
+    if(who==="other")setTimeout(()=>inp.focus(),30);
+  });
+  $("sheet").querySelectorAll("[data-n]").forEach(b=>b.onclick=()=>{inp.value=b.dataset.n;$("whoerr").hidden=true});
+  inp.oninput=()=>{$("whoerr").hidden=true};
+  inp.onkeydown=e=>{if(e.key==="Enter")$("whogo").click()};
+  $("whogo").onclick=()=>{
+    const n=inp.value.trim().replace(/\s+/g," ");
+    if(who==="other"&&!n){$("whoerr").hidden=false;inp.focus();return}
+    curWho=who==="other"?n.slice(0,30):"";closeModal();go();
+  };
+}
+function paintWho(){
+  const el=$("whol");if(!el)return;
+  el.innerHTML=`Ticket for <b>${curWho?esc(curWho):"you"}</b> <button class="btn sm ghost" id="whoc">Change</button>`;
+  $("whoc").onclick=()=>askWho(paintWho,true);
+}
+
 /* ---------- saved tickets: Onward / Return (kept only in this browser) ---------- */
 let tkMem=[],tkPersist=true,tkTimer=null;
 function tkAll(){
@@ -1026,10 +1073,10 @@ function readCard(){
 function saveTicket(){
   const dir=document.querySelector(".seg button.on").dataset.dir,d=readCard(),kind=d.train?"train":"bus",all=tkAll();
   const i=d.head[1]?all.findIndex(t=>t.d.head[1]===d.head[1]&&t.dir===dir&&t.kind===kind):-1;
-  const rec={id:i>=0?all[i].id:Date.now()+"-"+Math.random().toString(36).slice(2,7),dir,kind,saved:Date.now(),d};
+  const rec={id:i>=0?all[i].id:Date.now()+"-"+Math.random().toString(36).slice(2,7),dir,kind,saved:Date.now(),who:curWho,d};
   if(i>=0)all[i]=rec;else all.push(rec);
   tkStore(all);keepStorage();renderTickets();
-  $("tkmsg").innerHTML=(i>=0?"Updated the saved ":"Saved as ")+esc(dir)+" ticket."+(tkPersist?"":" This browser would not let me store it, so it is kept only until you close this page.")+" <button class=\"btn sm ghost\" onclick=\"openTickets()\">View my tickets</button>";
+  $("tkmsg").innerHTML=(i>=0?"Updated the saved ":"Saved as ")+esc(dir)+" ticket"+(curWho?" for "+esc(curWho):"")+"."+(tkPersist?"":" This browser would not let me store it, so it is kept only until you close this page.")+" <button class=\"btn sm ghost\" onclick=\"openTickets()\">View my tickets</button>";
 }
 const rv=(d,l)=>((d.rows.find(r=>r[0]===l)||["",""])[1]||"");
 /* "MGR CHENNAI CTL" -> "MGR Chennai CTL": keep short consonant-only codes in capitals */
@@ -1044,8 +1091,9 @@ function passHTML(t,j,past){
   const sub=(c,tm)=>[c,tm].filter(Boolean).join(", ");
   const more=d.pax.length-1,foot=tr?[p.coach&&"Coach <b>"+esc(p.coach)+"</b>",p.seat&&"Seat <b>"+esc(p.seat)+"</b>"]:[p.seat&&"Seat <b>"+esc(p.seat)+"</b>"];
   if(more>0)foot.push("+"+more+" passenger"+(more>1?"s":""));
+  if(t.who&&!past)foot.push("For <b>"+esc(t.who)+"</b>");
   return `<button class="rc ${t.kind} pass${past?" past":""}" data-o="${t.id}" aria-label="Open ${tr?"train":"bus"} ticket, ${esc(f.name||"origin")} to ${esc(to.name||"destination")}, ${esc(day)}">
-    <div class="rt2"><span>${esc(day)}</span><span>${esc(what)}</span></div>
+    <div class="rt2"><span>${esc(day)}${past&&t.who?" · For "+esc(t.who):""}</span><span>${esc(what)}</span></div>
     <div class="rr"><div class="st"><b${fitName(f.name)}>${esc(f.name||"From?")}</b><small>${esc(sub(f.code,dep))}</small></div>
       <div class="mid"><svg viewBox="0 0 48 48" aria-hidden="true">${ICON[t.kind]}</svg><i></i></div>
       <div class="st r"><b${fitName(to.name)}>${esc(to.name||"To?")}</b><small>${esc(sub(to.code,past&&!tr&&p.seat?"Seat "+p.seat:arr))}</small></div></div>
@@ -1076,7 +1124,7 @@ function openTicket(id,pop){
   const t=tkAll().find(x=>x.id===id);if(!t)return;
   $("tklist").hidden=true;nav("tickets",false);document.body.className=t.kind;if(pop!==true){try{history.pushState({v:"tickets",d:id},"")}catch(e){}}
   $("tkview").innerHTML=`<div class="topbar"><button class="back" id="tkvback">&larr; All tickets</button>${idPill()}</div>
-    <h1>${esc(t.dir)} journey</h1><p class="sub">${t.kind==="train"?"Train":"Bus"} ticket saved on this device.</p>`+cardHTML(t.d,true)+
+    <h1>${esc(t.dir)} journey</h1><p class="sub">${t.kind==="train"?"Train":"Bus"} ticket${t.who?" for "+esc(t.who):""} saved on this device.</p>`+cardHTML(t.d,true)+
     `<div class="acts2"><button class="btn dangerline" id="tkdel">Delete this ticket</button></div>`;
   const leave=()=>{if(history.state&&history.state.d)history.back();else openTickets()};
   $("tkvback").onclick=leave;
@@ -1100,10 +1148,13 @@ async function intakeShared(){
     const c=await caches.open("ta-share"),ks=await c.keys();if(!ks.length)return;
     const rs=await c.match(ks[0]),blob=await rs.blob(),name=decodeURIComponent(rs.headers.get("x-name")||"ticket");
     for(const k of ks)await c.delete(k);
-    type="auto";document.body.className="";
-    $("t2").textContent="Reading shared ticket";$("s2sub").textContent="Shared from another app. Working out whether it is a bus or train ticket.";
-    reset();nav("upload",false,true);
-    run(new File([blob],name,{type:blob.type||rs.headers.get("content-type")||""}));
+    const f=new File([blob],name,{type:blob.type||rs.headers.get("content-type")||""});
+    askWho(()=>{
+      type="auto";document.body.className="";
+      $("t2").textContent="Reading shared ticket";$("s2sub").textContent="Shared from another app. Working out whether it is a bus or train ticket.";
+      reset();nav("upload",false,true);
+      run(f);
+    });
   }catch(e){}
 }
 /* ---------- journey time (used to pick the next trip on Home) ---------- */
@@ -1193,6 +1244,7 @@ function homeCard(t,top,done,aria){
   const dep=(tr?rv(d,"Departure"):rv(d,"Departure time")).split(" · ")[0],arr=tr?rv(d,"Arrival").split(" · ")[0]:"";
   const parts=tr?[p.coach&&"Coach "+p.coach,p.seat&&"Seat "+p.seat,rv(d,"Train").split(" · ")[0]]:[p.seat&&"Seat "+p.seat,d.head[1]&&"PNR "+d.head[1]];
   if(d.pax.length>1)parts.push("+"+(d.pax.length-1)+" more");
+  if(t.who)parts.push("For "+t.who);
   const foot=parts.filter(Boolean),sub=(c,tm)=>[c,tm].filter(Boolean).join(", ");
   return `<button class="rc hc ${t.kind}${done?" done":""}" data-o="${t.id}" aria-label="${esc(aria)}">
     <div class="rt">${top}</div>
