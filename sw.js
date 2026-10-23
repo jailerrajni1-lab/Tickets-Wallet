@@ -1,6 +1,6 @@
 /* Wallet service worker: everything needed to read and save tickets and ID cards works without internet
    once the app has been opened online one time. */
-const V="wallet-v4",LIBC="wallet-libs-v1";
+const V="wallet-v5",LIBC="wallet-libs-v1";
 const SHELL=["./","index.html","manifest.webmanifest","icon-192.png","icon-512.png","apple-touch-icon.png"];
 /* Same SIMD test the scanner uses, so we keep the same engine file it will ask for */
 const SIMD=(()=>{try{return WebAssembly.validate(new Uint8Array([0,97,115,109,1,0,0,0,1,5,1,96,0,1,123,3,2,1,0,10,10,1,8,0,65,0,253,15,253,98,11]))}catch(e){return false}})();
